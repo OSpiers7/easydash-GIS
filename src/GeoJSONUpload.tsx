@@ -2,6 +2,7 @@ import React, { useState } from "react"; // Import React and useState hook
 import { FeatureCollection } from "geojson"; // Import FeatureCollection type from geojson
 import TableDisplay from "./TableDisplay"; // Import TableDisplay component
 import GeoJSONChart from "./GeoJSONChart"; // Import GeoJSONChart component
+import ChartForm from "./ChartForm";
 
 interface GeoJSONUploadProps {} // Define an empty interface for component props
 
@@ -12,6 +13,8 @@ const GeoJSONUpload: React.FC<GeoJSONUploadProps> = () => {
   );
   // Define state to hold any error messages, initialized to null
   const [error, setError] = useState<string | null>(null);
+  const [xAttr, setXAttr] = useState<string | null>(null);
+  const [yAttr, setYAttr] = useState<string | null>(null);
 
   // Event handler for file input change
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -19,7 +22,7 @@ const GeoJSONUpload: React.FC<GeoJSONUploadProps> = () => {
     const file = event.target.files?.[0];
 
     // Check if the file is a GeoJSON file
-    if (file && file.type === "application/geo+json") {
+    if (file && (file.type === "application/geo+json" || file.type === "application/json" || file.name.endsWith(".geojson"))) {
       const reader = new FileReader(); // Create a new FileReader instance
 
       // Define the onload event handler for the FileReader
@@ -42,6 +45,8 @@ const GeoJSONUpload: React.FC<GeoJSONUploadProps> = () => {
       };
 
       reader.readAsText(file); // Read the file content as text
+    } else {
+      setError("Please select a valid GeoJSON file."); // Set error for invalid file type
     }
   };
 
@@ -51,8 +56,15 @@ const GeoJSONUpload: React.FC<GeoJSONUploadProps> = () => {
       <input type="file" accept=".geojson" onChange={handleFileChange} />
       {/* Display error message if any */}
       {error && <p>{error}</p>}
-      {geoJSONData && <GeoJSONChart data={geoJSONData} />}
-      {/* Display the GeoJSON data in a table */}
+      {geoJSONData && (
+        <>
+          <ChartForm data={geoJSONData} onSelect={(x, y) => {
+            setXAttr(x);
+            setYAttr(y);
+          }} />
+          {xAttr && yAttr && <GeoJSONChart data={geoJSONData} xAttr={xAttr} yAttr={yAttr} />}
+          </> 
+      )}
     </div>
   );
 };

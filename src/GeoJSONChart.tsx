@@ -22,24 +22,34 @@ ChartJS.register(
 
 interface GeoJSONChartProps {
   data: FeatureCollection | null;
+  xAttr: string;
+  yAttr: string;
 }
 
-const transformGeoJSONForChart = (data: FeatureCollection) => {
-  const statusCounts: Record<string, number> = {};
+const transformGeoJSONForChart = (data: FeatureCollection, xAttr: string, yAttr: string) => {
+  const counts: Record<string, number> = {};
 
   data.features.forEach((feature) => {
-    const status = feature.properties?.OperationStatus;
-    if (status) {
-      statusCounts[status] = (statusCounts[status] || 0) + 1;
+    const xValue = feature.properties?.[xAttr];
+    const yValue = feature.properties?.[yAttr];
+
+    if (xValue !== undefined) {
+      if (typeof yValue ==="number") {
+        //sum numeric values
+        counts[xValue] = (counts[xValue] || 0) + yValue;
+      } else {
+        //count occurences
+        counts[xValue] = (counts[xValue] || 0) + 1
+      }
     }
   });
 
   return {
-    labels: Object.keys(statusCounts),
+    labels: Object.keys(counts),
     datasets: [
       {
-        label: "Operation Status Count",
-        data: Object.values(statusCounts),
+        label: "${xAttr} vs ${yAttr}",
+        data: Object.values(counts),
         backgroundColor: [
           "#FF6384",
           "#36A2EB",
@@ -52,10 +62,12 @@ const transformGeoJSONForChart = (data: FeatureCollection) => {
   };
 };
 
-const GeoJSONChart: React.FC<GeoJSONChartProps> = ({ data }) => {
-  if (!data) return <p>No data available</p>;
+const GeoJSONChart: React.FC<GeoJSONChartProps> = ({ data, xAttr, yAttr }) => {
+  if (!xAttr || !yAttr) return <p>Please select attributes to generate the chart.</p>;
 
-  const chartData = transformGeoJSONForChart(data);
+  if (!data) return <p>No data available to generate the chart.</p>;
+  
+  const chartData = transformGeoJSONForChart(data, xAttr, yAttr);
 
   return (
     <div style={{ width: "600px", height: "400px" }}>
@@ -66,12 +78,12 @@ const GeoJSONChart: React.FC<GeoJSONChartProps> = ({ data }) => {
           plugins: {
             title: {
               display: true,
-              text: "Operation Status Distribution",
+              text: "Distribution of ${yAttr} by ${xAttr}",
             },
           },
           scales: {
-            x: { title: { display: true, text: "Operation Status" } },
-            y: { title: { display: true, text: "Count" } },
+            x: { title: { display: true, text: xAttr } },
+            y: { title: { display: true, text: yAttr } },
           },
         }}
       />
