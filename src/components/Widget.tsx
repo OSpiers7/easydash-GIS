@@ -5,6 +5,7 @@ import { draggable } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { Resizable } from "react-resizable";
 import "react-resizable/css/styles.css";
 import WidgetBanner from "./WidgetBanner";
+import GeoJSONUpload from "../GeoJSONUpload";
 
 export interface WidgetProps {
   id: string;
@@ -31,6 +32,7 @@ export const Widget = ({
 
   // console.log(`Widget Rendered: ${id}`, { location, isDragging }); // Add this log
 
+  // useEffect for rendering draggable object on move
   useEffect(() => {
     const el = ref.current;
     const bannerEl = bannerRef.current;
@@ -95,7 +97,7 @@ export const Widget = ({
           width: "100%",
         }}
       >
-        Widget Content
+        <GeoJSONUpload />
       </div>
 
       {/* Resizable Handle - Placed in Bottom-Right Corner */}

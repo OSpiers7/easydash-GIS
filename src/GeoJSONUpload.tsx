@@ -19,7 +19,7 @@ const GeoJSONUpload: React.FC<GeoJSONUploadProps> = () => {
     const file = event.target.files?.[0];
 
     // Check if the file is a GeoJSON file
-    if (file && file.type === "application/geo+json") {
+    if (file && file.name.endsWith(".geojson")) {
       const reader = new FileReader(); // Create a new FileReader instance
 
       // Define the onload event handler for the FileReader

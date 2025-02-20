@@ -39,7 +39,7 @@
   position: absolute;
   top: 5px;
   right: 5px;
-  background-color: #900;
+  background-color: #c00;
   color: white;
   border: none;
   cursor: pointer;
@@ -48,5 +48,5 @@
 }
 
 .widget .remove-button:hover {
-  background-color: #c00;
+  background-color: #900;
 }
