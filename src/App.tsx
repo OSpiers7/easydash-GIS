@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./App.css";
-import GeoJSONUpload from "./GeoJSONUpload";
+import './chartjs-setup';
+import GeoJSONUpload from "./components/GeoJsonUpload";
 import Dashboard from "./components/Dashboard";
 
 function App() {

@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-//set up table data props
+
+// Define the props for the Table component
 interface TableProps {
   geoJsonData: any;
   height: any;
   width: any;
+  selectedFeatures: string[]; // Add selectedFeatures prop
 }
-//call the props
-function Table({ geoJsonData, height, width }: TableProps) {
+
+// Define the Table component
+function Table({ geoJsonData, height, width, selectedFeatures }: TableProps) {
   const [filters, setFilters] = useState<any>({});
   const [uniqueValues, setUniqueValues] = useState<any>({});
 
@@ -36,7 +39,7 @@ function Table({ geoJsonData, height, width }: TableProps) {
   // Generate table headers, including filters
   const generateTableHeaders = (features: any[]) => {
     if (features.length > 0) {
-      return Object.keys(features[0].properties).map((key) => (
+      return selectedFeatures.map((key) => (
         <th key={key} className="text-light">
           {key}
           <select
@@ -69,8 +72,8 @@ function Table({ geoJsonData, height, width }: TableProps) {
       })
       .map((feature, index) => (
         <tr key={index}>
-          {Object.values(feature.properties).map((value, idx) => (
-            <td key={idx} className="text-light">{value as React.ReactNode}</td>
+          {selectedFeatures.map((key, idx) => (
+            <td key={idx} className="text-light">{feature.properties[key] as React.ReactNode}</td>
           ))}
         </tr>
       ));

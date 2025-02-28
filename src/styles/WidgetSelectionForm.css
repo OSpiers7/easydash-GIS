@@ -1,0 +1,11 @@
+.vertical-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Adjust the gap as needed */
+}
+
+.vertical-form label {
+  display: flex;
+  align-items: center;
+  gap: 5px; /* Adjust the gap between radio button and label text as needed */
+}

@@ -3,8 +3,10 @@ import "../App.css";
 import { Coord } from "../Utils";
 import { Rnd } from "react-rnd";
 import WidgetBanner from "./WidgetBanner";
-import GeoJSONUpload from "../GeoJSONUpload";
+import GeoJSONUpload from "./GeoJsonUpload";
 import Table from "./Table";
+import GeoJSONChart from "./GeoJSONChart";
+import PieChart from "./PieChart"; // Import PieChart component
 
 import { debounce } from 'lodash'; // Import debounce from lodash
 
@@ -12,26 +14,26 @@ export interface WidgetProps {
   id: string;
   location: Coord;
   onRemove: (id: string) => void;
-
   geoJsonData: any;
+  type: string; // Add type prop
+  config: any; // Add config prop
 }
-
-
-
 
 export const Widget = ({
   id,
   location: initialLocation,
-  onRemove, geoJsonData
+  onRemove,
+  geoJsonData,
+  type, // Destructure type prop
+  config, // Destructure config prop
 }: WidgetProps) => {
   const bannerRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState({ width: 100, height: 100 });
   const [position, setPosition] = useState({ x: initialLocation.x, y: initialLocation.y });
 
-
-  //store the height and width of the table
-const [curHeight, setCurHeight] = useState<number>(100); // Default height
-const [curWidth, setCurWidth] = useState<number>(100);   // Default width
+  // Store the height and width of the table
+  const [curHeight, setCurHeight] = useState<number>(100); // Default height
+  const [curWidth, setCurWidth] = useState<number>(100);   // Default width
 
   // Debounced resize function to update height/width after user stops resizing
   const debouncedResize = useRef(
@@ -58,7 +60,6 @@ const [curWidth, setCurWidth] = useState<number>(100);   // Default width
       maxHeight={1000}
       bounds="parent" // Keep the widget within the Dashboard
       dragHandleClassName="widget-banner"
-      
       onDragStop={(e, d) => {
         debouncedDrag(d.x, d.y); // Debounced drag update
       }}
@@ -66,12 +67,9 @@ const [curWidth, setCurWidth] = useState<number>(100);   // Default width
         setSize({ width: parseInt(ref.style.width, 10), height: parseInt(ref.style.height, 10) });
         setPosition(newPosition); // Ensures correct positioning when resizing from corners 
         
-        //SETTING HEIGHT AND WIDTH FOR USE EFFECT
-     // Use the debounced function to update the table's size
+        // Use the debounced function to update the table's size
         debouncedResize(parseInt(ref.style.width, 10), parseInt(ref.style.height, 10));
-      }
-    
-    }
+      }}
     >
       <div
         className="widget"
@@ -99,17 +97,15 @@ const [curWidth, setCurWidth] = useState<number>(100);   // Default width
             height: "100%",
           }}
         >
-
-
-          {/**Send the data to the table might need to call in  a better place*/}
-          <Table geoJsonData={geoJsonData} height={curHeight} width={curWidth} />
-         
+          {/* Conditionally render content based on widget type */}
+          {type === "bar" && <GeoJSONChart data={geoJsonData} xAttr={config.xAttr} yAttr={config.yAttr} />}
+          {type === "pie" && <PieChart data={geoJsonData} xAttr={config.xAttr} />}
+          {type === "line" && <p>Line chart not implemented yet.</p>}
+          {type === "table" && <Table geoJsonData={geoJsonData} height={curHeight} width={curWidth} selectedFeatures={config.attributes} />}
         </div>
-
-       
-
-
       </div>
     </Rnd>
   );
 };
+
+export default Widget;

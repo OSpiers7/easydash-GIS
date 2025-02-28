@@ -3,27 +3,29 @@ import { FeatureCollection } from "geojson";
 
 interface ChartFormProps {
   data: FeatureCollection;
-  onSelect: (xAttr: string, yAttr: string) => void;
+  onSelect: (xAttr: string) => void;
 }
 
 const ChartForm: React.FC<ChartFormProps> = ({ data, onSelect }) => {
   const [xAttr, setXAttr] = useState<string>("");
 
-  // Extract all unique property keys from the GeoJSON features
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+if (!xAttr) {
+      alert("Please select an attribute for the X-Axis.");
+      return;
+    }
+    onSelect(xAttr); // Only pass xAttr
+  };
+
   const allProperties = new Set<string>();
   data.features.forEach((feature) => {
     Object.keys(feature.properties || {}).forEach((key) => allProperties.add(key));
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (xAttr) {
-      onSelect(xAttr, "count");
-    }
-  };
-
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit}>
+      <h3>Configure Chart</h3>
       <label>
         X-Axis Attribute:
         <select value={xAttr} onChange={(e) => setXAttr(e.target.value)}>
@@ -35,10 +37,7 @@ const ChartForm: React.FC<ChartFormProps> = ({ data, onSelect }) => {
           ))}
         </select>
       </label>
-
-      <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
-        Generate Chart
-      </button>
+      <button type="submit">Create Chart</button>
     </form>
   );
 };
