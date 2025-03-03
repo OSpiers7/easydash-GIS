@@ -80,11 +80,26 @@ function Table({ geoJsonData, height, width, selectedFeatures }: TableProps) {
   };
 
   return (
-    <div className="container mt-0">
+    <div className="container mt-0" style={{ width: '100%', height: '100%' }}>
       {geoJsonData && geoJsonData.features?.length > 0 && (
-        <div className="mt-0">
-          <div className="table-responsive" style={{ maxHeight: height - 30, maxWidth: width - 10, overflowY: "auto" }}>
-            <table className="table table-dark table-bordered table-hover table-sm">
+        <div className="mt-0" style={{ width: '100%', height: '100%' }}>
+          <div 
+            className="table-responsive"
+            style={{
+              width: '100%',
+              height: '100%',
+              overflowY: 'auto', // Enable scrolling if table exceeds available space
+            }}
+          >
+            <table
+              className="table table-dark table-bordered table-hover table-sm"
+              style={{
+                width: '100%',  // Ensure the table takes up full width
+                height: '100%', // Ensure the table takes up full height
+               // tableLayout: 'fixed', // Ensures consistent column widths
+               //overflowY: 'auto',
+              }}
+            >
               <thead className="bg-secondary">
                 <tr>{generateTableHeaders(geoJsonData.features)}</tr>
               </thead>

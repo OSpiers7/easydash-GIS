@@ -101,7 +101,7 @@ export const Widget = ({
           {type === "bar" && <GeoJSONChart data={geoJsonData} xAttr={config.xAttr} yAttr={config.yAttr} />}
           {type === "pie" && <PieChart data={geoJsonData} xAttr={config.xAttr} />}
           {type === "line" && <p>Line chart not implemented yet.</p>}
-          {type === "table" && <Table geoJsonData={geoJsonData} height={curHeight} width={curWidth} selectedFeatures={config.attributes} />}
+          {type === "table" && <Table geoJsonData={geoJsonData} height='100%' width='100%' selectedFeatures={config.attributes} />}
         </div>
       </div>
     </Rnd>
