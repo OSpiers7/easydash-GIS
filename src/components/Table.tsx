@@ -8,6 +8,20 @@ interface TableProps {
   selectedFeatures: string[]; // Add selectedFeatures prop
 }
 
+
+//USE THIS CODE TO ACCESS THE DATA FROM THE REDUX STORE
+//import { useSelector } from 'react-redux';
+
+// Access geoJsonData from Redux state
+//const geoJsonData = useSelector((state: any) => state.geoJsonData);
+
+
+
+
+
+
+
+
 // Define the Table component
 function Table({ geoJsonData, height, width, selectedFeatures }: TableProps) {
   const [filters, setFilters] = useState<any>({});

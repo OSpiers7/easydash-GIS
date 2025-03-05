@@ -9,21 +9,33 @@ import WidgetSelectionForm from './WidgetSelectionForm';
 import ChartForm from './ChartForm';
 import TableConfigForm from './TableConfigForm';
 
+
+import { useDispatch } from 'react-redux';  // Import useDispatch
+import { useSelector } from 'react-redux';
+
+import { FeatureCollection, Feature, Geometry, GeoJsonProperties } from 'geojson';
+
 const Dashboard: React.FC = () => {
   const [widgets, setWidgets] = useState<WidgetProps[]>([]);
   const dropZoneRef = useRef<HTMLDivElement>(null);
-  const [geoJsonData, setGeoJsonData] = useState<any>(null);
+
+
   const [isSelectionModalOpen, setSelectionModalOpen] = useState(false);
   const [isConfigModalOpen, setConfigModalOpen] = useState(false);
   const [selectedWidgetType, setSelectedWidgetType] = useState<string | null>(null);
   const [widgetConfig, setWidgetConfig] = useState<any>(null);
+
+
+  const [isFeatureSelectionModalOpen, setFeatureSelectionModalOpen] = useState(false);
+
+  const dispatch = useDispatch();
+
 
   const addWidget = (type: string, config: any) => {
     const newWidget = {
       id: `widget-${Date.now()}`,
       location: new Coord(500, 100),
       onRemove: removeWidget,
-      geoJsonData: geoJsonData,
       type: type,
       config: config,
     };
@@ -68,19 +80,28 @@ const Dashboard: React.FC = () => {
     <div className="dashboard">
       <TopBanner onAddWidget={() => setSelectionModalOpen(true)} />
       <div ref={dropZoneRef} className="drop-zone">
-        <UploadGeo setGeoJsonData={setGeoJsonData} />
+
+        <UploadGeo  />
+        
         {widgets.map((widget) => (
           <Widget
             key={widget.id}
             id={widget.id}
             location={widget.location}
             onRemove={removeWidget}
-            geoJsonData={geoJsonData}
             type={widget.type}
             config={widget.config}
           />
         ))}
       </div>
+
+        
+
+
+
+
+
+
 
       {/* Widget Selection Modal */}
       <Modal
@@ -106,8 +127,11 @@ const Dashboard: React.FC = () => {
         {selectedWidgetType === 'line' && (
           <p>Line chart configuration not implemented yet.</p>
         )}
-        {selectedWidgetType === 'table' && (
-          <TableConfigForm data={geoJsonData} onSelect={handleWidgetCreate} />
+        {selectedWidgetType === 'table' && geoJsonData.features.length > 0 && (
+          <TableConfigForm data={{
+            type: 'FeatureCollection',
+            features: [geoJsonData.features[0]], // Wrap the single feature in an array
+          }} onSelect={handleWidgetCreate} />
         )}
       </Modal>
     </div>

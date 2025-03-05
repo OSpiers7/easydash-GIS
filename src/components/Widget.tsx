@@ -8,8 +8,6 @@ import Table from "./Table";
 import GeoJSONChart from "./GeoJSONChart";
 import PieChart from "./PieChart"; // Import PieChart component
 
-import { debounce } from 'lodash'; // Import debounce from lodash
-
 export interface WidgetProps {
   id: string;
   location: Coord;
@@ -31,24 +29,6 @@ export const Widget = ({
   const [size, setSize] = useState({ width: 100, height: 100 });
   const [position, setPosition] = useState({ x: initialLocation.x, y: initialLocation.y });
 
-  // Store the height and width of the table
-  const [curHeight, setCurHeight] = useState<number>(100); // Default height
-  const [curWidth, setCurWidth] = useState<number>(100);   // Default width
-
-  // Debounced resize function to update height/width after user stops resizing
-  const debouncedResize = useRef(
-    debounce((width: number, height: number) => {
-      setCurWidth(width);
-      setCurHeight(height);
-    }, 500) // Delay the update to improve performance
-  ).current;
-
-  const debouncedDrag = useRef(
-    debounce((x: number, y: number) => {
-      setPosition({ x, y });
-    }, 500)
-  ).current;
-
   return (
     <Rnd
       className="widget-container"
@@ -61,14 +41,11 @@ export const Widget = ({
       bounds="parent" // Keep the widget within the Dashboard
       dragHandleClassName="widget-banner"
       onDragStop={(e, d) => {
-        debouncedDrag(d.x, d.y); // Debounced drag update
+        setPosition({ x: d.x, y: d.y }); // Direct drag update
       }}
       onResizeStop={(e, direction, ref, delta, newPosition) => {
         setSize({ width: parseInt(ref.style.width, 10), height: parseInt(ref.style.height, 10) });
         setPosition(newPosition); // Ensures correct positioning when resizing from corners 
-        
-        // Use the debounced function to update the table's size
-        debouncedResize(parseInt(ref.style.width, 10), parseInt(ref.style.height, 10));
       }}
     >
       <div
