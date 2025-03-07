@@ -42,16 +42,16 @@ const Dashboard: React.FC = () => {
     setConfigModalOpen(true);
   };
 
-  const handleWidgetCreate = (xAttr: string, yAttr?: string) => {
+  const handleWidgetCreate = (xAttr: string | string[], filters?: Record<string, string[]>) => {
     try {
       if (selectedWidgetType) {
         let config;
         if (selectedWidgetType === 'bar' || selectedWidgetType === 'pie') {
-          config = { xAttr, yAttr: 'count' }; // Automatically set yAttr to 'count'
-        } else if (selectedWidgetType === 'table') {
+          config = { xAttr, yAttr: 'count', filters }; // Automatically set yAttr to 'count'
+        } else if (selectedWidgetType === 'table' && typeof xAttr === 'string') {
           config = { attributes: xAttr.split(',') }; // Assuming xAttr contains comma-separated attributes for table
         } else {
-          config = { xAttr, yAttr };
+          config = { xAttr, yAttr: 'count', filters };
         }
         addWidget(selectedWidgetType, config);
       }
@@ -107,7 +107,7 @@ const Dashboard: React.FC = () => {
           <p>Line chart configuration not implemented yet.</p>
         )}
         {selectedWidgetType === 'table' && (
-          <TableConfigForm data={geoJsonData} onSelect={handleWidgetCreate} />
+          <TableConfigForm data={geoJsonData} onSelect={(attributes) => handleWidgetCreate(attributes)} />
         )}
       </Modal>
     </div>

@@ -98,8 +98,8 @@ export const Widget = ({
           }}
         >
           {/* Conditionally render content based on widget type */}
-          {type === "bar" && <GeoJSONChart data={geoJsonData} xAttr={config.xAttr} yAttr={config.yAttr} />}
-          {type === "pie" && <PieChart data={geoJsonData} xAttr={config.xAttr} />}
+          {type === "bar" && <GeoJSONChart data={geoJsonData} xAttr={config.xAttr} yAttr={config.yAttr} filters={config.filters} />}
+          {type === "pie" && <PieChart data={geoJsonData} xAttr={config.xAttr} filters={config.filters} />}
           {type === "line" && <p>Line chart not implemented yet.</p>}
           {type === "table" && <Table geoJsonData={geoJsonData} height='100%' width='100%' selectedFeatures={config.attributes} />}
         </div>

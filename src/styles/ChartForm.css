@@ -1,13 +1,7 @@
-.vertical-form {
+.chart-form {
   display: flex;
   flex-direction: column;
-  gap: 10px; /* Adjust the gap as needed */
-}
-
-.vertical-form label {
-  display: flex;
-  flex-direction: column;
-  gap: 5px; /* Adjust the gap between elements as needed */
+  gap: 10px;
 }
 
 .form-button {
@@ -17,21 +11,16 @@
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  text-align: left;
 }
 
 .form-button:hover {
   background-color: #0056b3;
 }
 
-.form-button.selected {
-  background-color: #0056b3;
-}
-
 .form-label {
   display: flex;
   flex-direction: column;
-  gap: 5px; /* Adjust the gap between elements as needed */
+  gap: 5px;
 }
 
 .form-select {

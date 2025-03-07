@@ -6,9 +6,10 @@ interface GeoJSONChartProps {
   data: FeatureCollection;
   xAttr: string;
   yAttr: string;
+  filters: Record<string, string[]>;
 }
 
-const GeoJSONChart: React.FC<GeoJSONChartProps> = ({ data, xAttr, yAttr }) => {
+const GeoJSONChart: React.FC<GeoJSONChartProps> = ({ data, xAttr, yAttr, filters }) => {
   if (!xAttr || !yAttr) return <p>Please select chart attributes to generate chart.</p>;
 
   try {
@@ -20,7 +21,16 @@ const GeoJSONChart: React.FC<GeoJSONChartProps> = ({ data, xAttr, yAttr }) => {
     data.features.forEach((feature) => {
       const xValue = feature.properties?.[xAttr];
       if (xValue !== undefined) {
-        counts[xValue] = (counts[xValue] || 0) + 1;
+        let include = true;
+        for (const [attr, filterValues] of Object.entries(filters)) {
+          if (filterValues.length > 0 && feature.properties && !filterValues.includes(feature.properties[attr])) {
+            include = false;
+            break;
+          }
+        }
+        if (include) {
+          counts[xValue] = (counts[xValue] || 0) + 1;
+        }
       }
     });
 

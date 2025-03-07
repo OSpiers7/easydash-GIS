@@ -8,51 +8,43 @@ interface WidgetSelectionFormProps {
 const WidgetSelectionForm: React.FC<WidgetSelectionFormProps> = ({ onSelect }) => {
   const [selectedChart, setSelectedChart] = useState<string>("");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedChart(e.target.value);
-    onSelect(e.target.value);
+  const handleButtonClick = (chartType: string) => {
+    setSelectedChart(chartType);
+    onSelect(chartType);
   };
 
   return (
     <div>
       <h3>Select Widget Type</h3>
       <form className="vertical-form">
-        <label>
-          <input
-            type="radio"
-            value="bar"
-            checked={selectedChart === "bar"}
-            onChange={handleChange}
-          />
+        <button
+          type="button"
+          className={`form-button ${selectedChart === "bar" ? "selected" : ""}`}
+          onClick={() => handleButtonClick("bar")}
+        >
           Bar Chart
-        </label>
-        <label>
-          <input
-            type="radio"
-            value="line"
-            checked={selectedChart === "line"}
-            onChange={handleChange}
-          />
+        </button>
+        <button
+          type="button"
+          className={`form-button ${selectedChart === "line" ? "selected" : ""}`}
+          onClick={() => handleButtonClick("line")}
+        >
           Line Graph
-        </label>
-        <label>
-          <input
-            type="radio"
-            value="pie"
-            checked={selectedChart === "pie"}
-            onChange={handleChange}
-          />
+        </button>
+        <button
+          type="button"
+          className={`form-button ${selectedChart === "pie" ? "selected" : ""}`}
+          onClick={() => handleButtonClick("pie")}
+        >
           Pie Chart
-        </label>
-        <label>
-          <input
-            type="radio"
-            value="table"
-            checked={selectedChart === "table"}
-            onChange={handleChange}
-          />
+        </button>
+        <button
+          type="button"
+          className={`form-button ${selectedChart === "table" ? "selected" : ""}`}
+          onClick={() => handleButtonClick("table")}
+        >
           Table
-        </label>
+        </button>
       </form>
     </div>
   );
