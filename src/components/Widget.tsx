@@ -6,7 +6,8 @@ import WidgetBanner from "./WidgetBanner";
 import GeoJSONUpload from "./GeoJsonUpload";
 import Table from "./Table";
 import GeoJSONChart from "./GeoJSONChart";
-import PieChart from "./PieChart"; // Import PieChart component
+import PieChart from "./PieChart";
+import Map from "./Map"; // Import Map component
 
 import { debounce } from 'lodash'; // Import debounce from lodash
 
@@ -28,12 +29,12 @@ export const Widget = ({
   config, // Destructure config prop
 }: WidgetProps) => {
   const bannerRef = useRef<HTMLDivElement | null>(null);
-  const [size, setSize] = useState({ width: 100, height: 100 });
-  const [position, setPosition] = useState({ x: initialLocation.x, y: initialLocation.y });
+  const [size, setSize] = useState({ width: 300, height: 300 });
+  const [position, setPosition] = useState({ x: 200, y: 800 }); // Updated initial position
 
   // Store the height and width of the table
-  const [curHeight, setCurHeight] = useState<number>(100); // Default height
-  const [curWidth, setCurWidth] = useState<number>(100);   // Default width
+  const [curHeight, setCurHeight] = useState<number>(300); // Default height
+  const [curWidth, setCurWidth] = useState<number>(300);   // Default width
 
   // Debounced resize function to update height/width after user stops resizing
   const debouncedResize = useRef(
@@ -102,6 +103,7 @@ export const Widget = ({
           {type === "pie" && <PieChart data={geoJsonData} xAttr={config.xAttr} filters={config.filters} />}
           {type === "line" && <p>Line chart not implemented yet.</p>}
           {type === "table" && <Table geoJsonData={geoJsonData} height='100%' width='100%' selectedFeatures={config.attributes} />}
+          {type === "map" && <Map geoJsonData={geoJsonData} />} {/* Render Map component */}
         </div>
       </div>
     </Rnd>

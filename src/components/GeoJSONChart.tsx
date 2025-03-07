@@ -39,11 +39,20 @@ const GeoJSONChart: React.FC<GeoJSONChartProps> = ({ data, xAttr, yAttr, filters
       values.push(counts[key]);
     });
 
+    const filterDescriptions = Object.entries(filters)
+      .filter(([_, values]) => values.length > 0)
+      .map(([attr, values]) => `${attr}(s): ${values.join(', ')}`)
+      .join('; ');
+
+    const chartTitle = filterDescriptions
+      ? `${xAttr} vs ${yAttr} for ${filterDescriptions}`
+      : `${xAttr} vs ${yAttr}`;
+
     const chartData = {
       labels,
       datasets: [
         {
-          label: `${xAttr} vs ${yAttr}`,
+          label: chartTitle,
           data: values,
           backgroundColor: 'rgba(75, 192, 192, 0.6)',
         },

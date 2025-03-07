@@ -45,6 +45,13 @@ const WidgetSelectionForm: React.FC<WidgetSelectionFormProps> = ({ onSelect }) =
         >
           Table
         </button>
+        <button
+          type="button"
+          className={`form-button ${selectedChart === "map" ? "selected" : ""}`}
+          onClick={() => handleButtonClick("map")}
+        >
+          Map
+        </button>
       </form>
     </div>
   );

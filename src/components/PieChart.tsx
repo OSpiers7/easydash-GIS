@@ -38,6 +38,15 @@ const PieChart: React.FC<PieChartProps> = ({ data, xAttr, filters }) => {
       values.push(counts[key]);
     });
 
+    const filterDescriptions = Object.entries(filters)
+      .filter(([_, values]) => values.length > 0)
+      .map(([attr, values]) => `${attr}(s): ${values.join(', ')}`)
+      .join('; ');
+
+    const chartTitle = filterDescriptions
+      ? `${xAttr} vs count for ${filterDescriptions}`
+      : `${xAttr} vs count`;
+
     const chartData = {
       labels,
       datasets: [
@@ -55,7 +64,16 @@ const PieChart: React.FC<PieChartProps> = ({ data, xAttr, filters }) => {
       ],
     };
 
-    return <Pie data={chartData} />;
+    const options = {
+      plugins: {
+        title: {
+          display: true,
+          text: chartTitle,
+        },
+      },
+    };
+
+    return <Pie data={chartData} options={options} />;
   } catch (error) {
     console.error('Error generating pie chart:', error);
     return <p>An error occurred while generating the pie chart. Please try again.</p>;
