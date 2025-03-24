@@ -1,12 +1,14 @@
 import React, { useState } from "react";
-import { FeatureCollection } from "geojson";
+import { Feature, FeatureCollection } from "geojson";
+//USE THIS CODE TO ACCESS THE DATA FROM THE REDUX STORE
+import { useSelector } from 'react-redux';
+
 
 interface TableConfigFormProps {
-  data: FeatureCollection;
   onSelect: (attributes: string) => void;
 }
 
-const TableConfigForm: React.FC<TableConfigFormProps> = ({ data, onSelect }) => {
+const TableConfigForm: React.FC<TableConfigFormProps> = ({ onSelect }) => {
   const [selectedAttributes, setSelectedAttributes] = useState<string[]>([]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,8 +25,16 @@ const TableConfigForm: React.FC<TableConfigFormProps> = ({ data, onSelect }) => 
     onSelect(selectedAttributes.join(",")); // Pass comma-separated attributes
   };
 
+  const data = useSelector((state: any) => state.geoJsonData[0]);
+
+
+
+  console.log(data);
+
+
+
   const allAttributes = new Set<string>();
-  data.features.forEach((feature) => {
+  data.features.forEach((feature: Feature) => {
     Object.keys(feature.properties || {}).forEach((key) => allAttributes.add(key));
   });
 

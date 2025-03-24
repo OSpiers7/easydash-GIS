@@ -1,14 +1,16 @@
 import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap styles for UI
-import { FeatureCollection, Feature, Geometry, GeoJsonProperties } from 'geojson';
-
-import { useDispatch } from 'react-redux';
+import { FeatureCollection, Geometry, GeoJsonProperties } from 'geojson';
+import { useDispatch, useSelector } from 'react-redux'; // Use both useDispatch and useSelector
 import { setGeoJsonData } from '../redux/actions';  // Import the action
-
 
 // Define the UploadGeo component
 function UploadGeo() {
-//CALL THE DISPATCHER TO SET THE ACTION
+  // Call the dispatcher to set the action
   const dispatch = useDispatch();
+
+  // Access the geoJsonData from the Redux store
+  const geoJsonData = useSelector((state: any) => state.geoJsonData);
+
   // Handle file input change
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     // Get the selected files from the file input
@@ -31,25 +33,23 @@ function UploadGeo() {
 
     // Create an array of promises that will read each file asynchronously
     const readers = validFiles.map((file) => {
-      return new Promise((resolve, reject) => {
+      return new Promise<[string, FeatureCollection<Geometry, GeoJsonProperties>]>((resolve, reject) => {
         const reader = new FileReader(); // Create a new FileReader to read the file
 
         // When file reading is complete, attempt to parse the file content
         reader.onload = () => {
-
           try {
             // Ensure `reader.result` is a string
             const result = reader.result;
             if (typeof result === 'string') {
               const parsedData = JSON.parse(result) as FeatureCollection<Geometry, GeoJsonProperties>;
-              resolve(parsedData); // Resolve the promise with parsed data
+              resolve([file.name, parsedData]); // Resolve the promise with the file name as the key
             } else {
               reject(`Error: file content is not a valid string.`);
             }
           } catch (error) {
             reject(`Error parsing file: ${file.name}`); // Reject the promise if parsing fails
           }
-
         };
 
         // If there's an error reading the file, reject the promise
@@ -58,17 +58,25 @@ function UploadGeo() {
       });
     });
 
-    // Use Promise.all to wait for all file reading and parsing to complete
-    Promise.all(readers)
-      .then((newData) => {
-//REDUX TO DISPATCH TO THE SETGEOJSONDATA INSIDFE OF ACTIONS
-        dispatch(setGeoJsonData({
-          type: 'FeatureCollection',
-          features: newData.flatMap((data) => (data as FeatureCollection<Geometry, GeoJsonProperties>).features)
-        }));  
+// Use Promise.all to wait for all file reading and parsing to complete
+Promise.all(readers)
+  .then((newData) => {
+    // Create a new Map with the correct type
+    const updatedMap: Map<string, FeatureCollection<Geometry, GeoJsonProperties>> = new Map(geoJsonData);
 
-      })
-      .catch((error) => alert(error)); // If any error occurs, show an alert with the error message
+    // Add new data to the map
+    newData.forEach(([fileName, data]) => {
+      updatedMap.set(fileName, data); // Set each file's data using its name as the key
+    });
+
+    // Dispatch the updated Map to Redux
+    dispatch(setGeoJsonData(updatedMap));
+
+    // Log the updated datasets that have been added
+    console.log("Updated GeoJSON Data in Redux:", updatedMap);
+  })
+  .catch((error) => alert(error)); // If any error occurs, show an alert with the error message
+
   };
 
   // Render the file upload button

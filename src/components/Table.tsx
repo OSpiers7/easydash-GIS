@@ -1,31 +1,21 @@
 import React, { useState, useEffect } from 'react';
 
+//USE THIS CODE TO ACCESS THE DATA FROM THE REDUX STORE
+import { useSelector } from 'react-redux';
+
 // Define the props for the Table component
 interface TableProps {
-  geoJsonData: any;
-  height: any;
-  width: any;
   selectedFeatures: string[]; // Add selectedFeatures prop
 }
 
-
-//USE THIS CODE TO ACCESS THE DATA FROM THE REDUX STORE
-//import { useSelector } from 'react-redux';
-
 // Access geoJsonData from Redux state
 //const geoJsonData = useSelector((state: any) => state.geoJsonData);
-
-
-
-
-
-
-
-
 // Define the Table component
-function Table({ geoJsonData, height, width, selectedFeatures }: TableProps) {
+function Table({ selectedFeatures }: TableProps) {
   const [filters, setFilters] = useState<any>({});
   const [uniqueValues, setUniqueValues] = useState<any>({});
+
+  const geoJsonData = useSelector((state: any) => state.geoJsonData[0]);
 
   // Function to extract unique values from each column
   useEffect(() => {
@@ -52,8 +42,8 @@ function Table({ geoJsonData, height, width, selectedFeatures }: TableProps) {
 
   // Generate table headers, including filters
   const generateTableHeaders = (features: any[]) => {
-    if (features.length > 0) {
-      return selectedFeatures.map((key) => (
+    if (selectedFeatures.length > 0) {
+      return features.map((key) => (
         <th key={key} className="text-light">
           {key}
           <select

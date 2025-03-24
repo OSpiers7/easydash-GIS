@@ -8,11 +8,16 @@ import Table from "./Table";
 import GeoJSONChart from "./GeoJSONChart";
 import PieChart from "./PieChart"; // Import PieChart component
 
+
+//USE THIS CODE TO ACCESS THE DATA FROM THE REDUX STORE
+import { useSelector } from 'react-redux';
+
+
 export interface WidgetProps {
   id: string;
   location: Coord;
   onRemove: (id: string) => void;
-  geoJsonData: any;
+ // geoJsonData: any;
   type: string; // Add type prop
   config: any; // Add config prop
 }
@@ -21,10 +26,13 @@ export const Widget = ({
   id,
   location: initialLocation,
   onRemove,
-  geoJsonData,
+  //geoJsonData,
   type, // Destructure type prop
   config, // Destructure config prop
 }: WidgetProps) => {
+
+  const geoJsonData = useSelector((state: any) => state.geoJsonData[0]);
+
   const bannerRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState({ width: 100, height: 100 });
   const [position, setPosition] = useState({ x: initialLocation.x, y: initialLocation.y });
@@ -74,11 +82,13 @@ export const Widget = ({
             height: "100%",
           }}
         >
+
+          
           {/* Conditionally render content based on widget type */}
           {type === "bar" && <GeoJSONChart data={geoJsonData} xAttr={config.xAttr} yAttr={config.yAttr} />}
           {type === "pie" && <PieChart data={geoJsonData} xAttr={config.xAttr} />}
-          {type === "line" && <p>Line chart not implemented yet.</p>}
-          {type === "table" && <Table geoJsonData={geoJsonData} height='100%' width='100%' selectedFeatures={config.attributes} />}
+          {type === "line" && <p>Line chart not implemented yet.</p>} 
+          {type === "table" && <Table selectedFeatures={config.attributes} />}
         </div>
       </div>
     </Rnd>
