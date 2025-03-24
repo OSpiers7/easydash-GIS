@@ -9,6 +9,9 @@ interface TableConfigFormProps {
 }
 
 const TableConfigForm: React.FC<TableConfigFormProps> = ({ onSelect }) => {
+
+ 
+
   const [selectedAttributes, setSelectedAttributes] = useState<string[]>([]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,12 +28,11 @@ const TableConfigForm: React.FC<TableConfigFormProps> = ({ onSelect }) => {
     onSelect(selectedAttributes.join(",")); // Pass comma-separated attributes
   };
 
-  const data = useSelector((state: any) => state.geoJsonData[0]);
+  const ReduxKey = useSelector((state: any) => state.geoJsonDataKey);
+  const data = useSelector((state: any) => state.geoJsonData.get(ReduxKey));
 
-
-
-  console.log(data);
-
+  console.log("TABLE CONFIG DATA: ", data)
+  console.log("KEYYY", ReduxKey)
 
 
   const allAttributes = new Set<string>();

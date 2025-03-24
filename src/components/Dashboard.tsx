@@ -27,6 +27,9 @@ const Dashboard: React.FC = () => {
   const geoJsonData = useSelector((state: any) => state.geoJsonData[0] ?? { features: [] });
 
 
+  console.log("KEY", ReduxKey)
+  
+
 
   const [widgets, setWidgets] = useState<WidgetProps[]>([]);
   const dropZoneRef = useRef<HTMLDivElement>(null);
@@ -42,6 +45,7 @@ const Dashboard: React.FC = () => {
 
   const dispatch = useDispatch();
 
+  
 
 
   const addWidget = (type: string, config: any) => {
@@ -174,8 +178,8 @@ const Dashboard: React.FC = () => {
           <p>Line chart configuration not implemented yet.</p>
         )}
 
-        {selectedWidgetType === "table" && geoJsonData.features.length > 0 && (
-          <TableConfigForm onSelect={(attributes) => handleWidgetCreate(attributes)} />
+        {selectedWidgetType === "table" && (
+          <TableConfigForm onSelect= {handleWidgetCreate} />
 
         )}
       </Modal>

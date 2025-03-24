@@ -32,7 +32,10 @@ export const Widget = ({
   config, // Destructure config prop
 }: WidgetProps) => {
 
-  const geoJsonData = useSelector((state: any) => state.geoJsonData[0]);
+  const ReduxKey = useSelector((state: any) => state.geoJsonDataKey);
+  const geoJsonData = useSelector((state: any) => state.geoJsonData.get(ReduxKey));
+
+  
 
   const bannerRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState({ width: 300, height: 300 });

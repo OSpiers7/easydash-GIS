@@ -5,17 +5,24 @@ import { useSelector } from 'react-redux';
 
 // Define the props for the Table component
 interface TableProps {
-  selectedFeatures: string[]; // Add selectedFeatures prop
+  selectedFeatures: string; // Add selectedFeatures prop
 }
 
 // Access geoJsonData from Redux state
 //const geoJsonData = useSelector((state: any) => state.geoJsonData);
 // Define the Table component
 function Table({ selectedFeatures }: TableProps) {
+
+
+
   const [filters, setFilters] = useState<any>({});
   const [uniqueValues, setUniqueValues] = useState<any>({});
 
-  const geoJsonData = useSelector((state: any) => state.geoJsonData[0]);
+  const ReduxKey = useSelector((state: any) => state.geoJsonDataKey);
+  const geoJsonData = useSelector((state: any) => state.geoJsonData.get(ReduxKey));
+
+  // Split the selectedFeatures string into an array of attributes
+  const selectedAttributes = selectedFeatures.split(',');
 
   // Function to extract unique values from each column
   useEffect(() => {
@@ -41,9 +48,9 @@ function Table({ selectedFeatures }: TableProps) {
   };
 
   // Generate table headers, including filters
-  const generateTableHeaders = (features: any[]) => {
-    if (selectedFeatures.length > 0) {
-      return features.map((key) => (
+  const generateTableHeaders = () => {
+    if (selectedAttributes.length > 0) {
+      return selectedAttributes.map((key) => (
         <th key={key} className="text-light">
           {key}
           <select
@@ -64,20 +71,20 @@ function Table({ selectedFeatures }: TableProps) {
     return null;
   };
 
-  // Generate table rows based on filters
-  const generateTableRows = (features: any[]) => {
-    return features
-      .filter((feature) => {
-        return Object.keys(filters).every((key) => {
+   // Generate table rows based on filters
+   const generateTableRows = () => {
+    return geoJsonData.features
+      .filter((feature: any) => {
+        return selectedAttributes.every((key: string) => {
           const value = feature.properties[key];
           const filterValue = filters[key];
           return !filterValue || value === filterValue;
         });
       })
-      .map((feature, index) => (
+      .map((feature: any, index: number) => (
         <tr key={index}>
-          {selectedFeatures.map((key, idx) => (
-            <td key={idx} className="text-light">{feature.properties[key] as React.ReactNode}</td>
+          {selectedAttributes.map((key: string, idx: number) => (
+            <td key={idx} className="text-light">{feature.properties[key]}</td>
           ))}
         </tr>
       ));
@@ -105,9 +112,9 @@ function Table({ selectedFeatures }: TableProps) {
               }}
             >
               <thead className="bg-secondary">
-                <tr>{generateTableHeaders(geoJsonData.features)}</tr>
+                <tr>{generateTableHeaders()}</tr>
               </thead>
-              <tbody>{generateTableRows(geoJsonData.features)}</tbody>
+              <tbody>{generateTableRows()}</tbody>
             </table>
           </div>
         </div>
