@@ -5,9 +5,10 @@ import { FeatureCollection } from 'geojson';
 interface PieChartProps {
   data: FeatureCollection;
   xAttr: string;
+  filters: Record<string, string[]>;
 }
 
-const PieChart: React.FC<PieChartProps> = ({ data, xAttr }) => {
+const PieChart: React.FC<PieChartProps> = ({ data, xAttr, filters }) => {
   if (!xAttr) return <p>Please select chart attributes to generate chart.</p>;
 
   try {
@@ -19,7 +20,16 @@ const PieChart: React.FC<PieChartProps> = ({ data, xAttr }) => {
     data.features.forEach((feature) => {
       const value = feature.properties?.[xAttr];
       if (value) {
-        counts[value] = (counts[value] || 0) + 1;
+        let include = true;
+        for (const [attr, filterValues] of Object.entries(filters)) {
+          if (filterValues.length > 0 && feature.properties && !filterValues.includes(feature.properties[attr])) {
+            include = false;
+            break;
+          }
+        }
+        if (include) {
+          counts[value] = (counts[value] || 0) + 1;
+        }
       }
     });
 
@@ -27,6 +37,15 @@ const PieChart: React.FC<PieChartProps> = ({ data, xAttr }) => {
       labels.push(key);
       values.push(counts[key]);
     });
+
+    const filterDescriptions = Object.entries(filters)
+      .filter(([_, values]) => values.length > 0)
+      .map(([attr, values]) => `${attr}(s): ${values.join(', ')}`)
+      .join('; ');
+
+    const chartTitle = filterDescriptions
+      ? `${xAttr} vs count for ${filterDescriptions}`
+      : `${xAttr} vs count`;
 
     const chartData = {
       labels,
@@ -45,7 +64,16 @@ const PieChart: React.FC<PieChartProps> = ({ data, xAttr }) => {
       ],
     };
 
-    return <Pie data={chartData} />;
+    const options = {
+      plugins: {
+        title: {
+          display: true,
+          text: chartTitle,
+        },
+      },
+    };
+
+    return <Pie data={chartData} options={options} />;
   } catch (error) {
     console.error('Error generating pie chart:', error);
     return <p>An error occurred while generating the pie chart. Please try again.</p>;

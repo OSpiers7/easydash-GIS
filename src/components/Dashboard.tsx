@@ -1,13 +1,13 @@
-import React, { useRef, useState } from 'react';
-import TopBanner from './TopBanner';
-import { Widget, WidgetProps } from './Widget';
-import '../Dashboard.css';
-import { Coord } from '../Utils';
-import UploadGeo from './GeoJsonUpload';
-import Modal from './Modal';
-import WidgetSelectionForm from './WidgetSelectionForm';
-import ChartForm from './ChartForm';
-import TableConfigForm from './TableConfigForm';
+import React, { useRef, useState } from "react";
+import TopBanner from "./TopBanner";
+import { Widget, WidgetProps } from "./Widget";
+import "../Dashboard.css";
+import { Coord } from "../Utils";
+import UploadGeo from "./GeoJsonUpload";
+import Modal from "./Modal";
+import WidgetSelectionForm from "./WidgetSelectionForm";
+import ChartForm from "./ChartForm";
+import TableConfigForm from "./TableConfigForm";
 
 import DataSelectionForm from './DataSelectionForm';
 
@@ -65,19 +65,23 @@ const Dashboard: React.FC = () => {
   const handleWidgetSelect = (widgetType: string) => {
     setSelectedWidgetType(widgetType);
     setSelectionModalOpen(false);
-    setConfigModalOpen(true);
+    if (widgetType === "map") {
+      addWidget(widgetType, {}); // Directly add the map widget without configuration
+    } else {
+      setConfigModalOpen(true);
+    }
   };
 
-  const handleWidgetCreate = (xAttr: string, yAttr?: string) => {
+  const handleWidgetCreate = (xAttr: string, filters?: Record<string, string[]>) => {
     try {
       if (selectedWidgetType) {
         let config;
-        if (selectedWidgetType === 'bar' || selectedWidgetType === 'pie') {
-          config = { xAttr, yAttr: 'count' }; // Automatically set yAttr to 'count'
-        } else if (selectedWidgetType === 'table') {
-          config = { attributes: xAttr.split(',') }; // Assuming xAttr contains comma-separated attributes for table
+        if (selectedWidgetType === "bar" || selectedWidgetType === "pie") {
+          config = { xAttr, yAttr: "count", filters }; // Automatically set yAttr to "count"
+        } else if (selectedWidgetType === "table") {
+          config = { attributes: xAttr }; // Assuming xAttr contains comma-separated attributes for table
         } else {
-          config = { xAttr, yAttr };
+          config = { xAttr, yAttr: "count", filters };
         }
         addWidget(selectedWidgetType, config);
       }
@@ -85,8 +89,8 @@ const Dashboard: React.FC = () => {
       setSelectedWidgetType(null);
       setWidgetConfig(null);
     } catch (error) {
-      console.error('Error creating widget:', error);
-      alert('An error occurred while creating the widget. Please try again.');
+      console.error("Error creating widget:", error);
+      alert("An error occurred while creating the widget. Please try again.");
     }
   };
 
@@ -158,17 +162,21 @@ const Dashboard: React.FC = () => {
         onClose={() => setConfigModalOpen(false)}
         title="Configure Widget"
       >
-        {selectedWidgetType === 'bar' && (
-         <ChartForm data={geoJsonData} onSelect={handleWidgetCreate} />
+
+        {selectedWidgetType === "bar" && (
+          <ChartForm data={geoJsonData} onSelect={handleWidgetCreate} />
         )}
-        {selectedWidgetType === 'pie' && (
-         <ChartForm data={geoJsonData} onSelect={handleWidgetCreate} />
+        {selectedWidgetType === "pie" && (
+          <ChartForm data={geoJsonData} onSelect={handleWidgetCreate} />
+
         )}
-        {selectedWidgetType === 'line' && (
+        {selectedWidgetType === "line" && (
           <p>Line chart configuration not implemented yet.</p>
         )}
-        {selectedWidgetType === 'table' && geoJsonData.features.length > 0 && (
-          <TableConfigForm onSelect={handleWidgetCreate} />
+
+        {selectedWidgetType === "table" && geoJsonData.features.length > 0 && (
+          <TableConfigForm onSelect={(attributes) => handleWidgetCreate(attributes)} />
+
         )}
       </Modal>
     </div>

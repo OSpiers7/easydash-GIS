@@ -6,7 +6,8 @@ import WidgetBanner from "./WidgetBanner";
 import GeoJSONUpload from "./GeoJsonUpload";
 import Table from "./Table";
 import GeoJSONChart from "./GeoJSONChart";
-import PieChart from "./PieChart"; // Import PieChart component
+import PieChart from "./PieChart";
+import Map from "./Map"; // Import Map component
 
 
 //USE THIS CODE TO ACCESS THE DATA FROM THE REDUX STORE
@@ -34,8 +35,8 @@ export const Widget = ({
   const geoJsonData = useSelector((state: any) => state.geoJsonData[0]);
 
   const bannerRef = useRef<HTMLDivElement | null>(null);
-  const [size, setSize] = useState({ width: 100, height: 100 });
-  const [position, setPosition] = useState({ x: initialLocation.x, y: initialLocation.y });
+  const [size, setSize] = useState({ width: 300, height: 300 });
+  const [position, setPosition] = useState({ x: 200, y: 800 }); // Updated initial position
 
   return (
     <Rnd
@@ -85,10 +86,13 @@ export const Widget = ({
 
           
           {/* Conditionally render content based on widget type */}
-          {type === "bar" && <GeoJSONChart data={geoJsonData} xAttr={config.xAttr} yAttr={config.yAttr} />}
-          {type === "pie" && <PieChart data={geoJsonData} xAttr={config.xAttr} />}
-          {type === "line" && <p>Line chart not implemented yet.</p>} 
+
+          {type === "bar" && <GeoJSONChart data={geoJsonData} xAttr={config.xAttr} yAttr={config.yAttr} filters={config.filters} />}
+          {type === "pie" && <PieChart data={geoJsonData} xAttr={config.xAttr} filters={config.filters} />}
+          {type === "line" && <p>Line chart not implemented yet.</p>}
           {type === "table" && <Table selectedFeatures={config.attributes} />}
+          {type === "map" && <Map geoJsonData={geoJsonData} />} {/* Render Map component */}
+
         </div>
       </div>
     </Rnd>
