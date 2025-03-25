@@ -1,6 +1,8 @@
 .top-banner {
   width: 100%;
-  height: 60px;
+  height: auto; /* Let the height adjust dynamically */
+  min-height: 80px; /* Ensure enough space */
+  padding: 10px 0; /* Add some spacing */
   background-color: #222;
   color: white;
   display: flex;
@@ -25,4 +27,11 @@
 
 .top-banner button:hover {
   background-color: #555;
+}
+
+.top-banner-content {
+  display: flex;
+  flex-direction: row;
+  align-items: center; /* Align items vertically */
+  gap: 10px; /* Adds spacing between the button and UploadGeo */
 }

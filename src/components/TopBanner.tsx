@@ -1,5 +1,6 @@
 import React from "react";
 import "../TopBanner.css";
+import UploadGeo from "./GeoJsonUpload";
 
 interface TopBannerProps {
   onAddWidget: () => void;
@@ -7,7 +8,10 @@ interface TopBannerProps {
 
 const TopBanner: React.FC<TopBannerProps> = ({ onAddWidget }) => (
   <div className="top-banner">
-    <button onClick={onAddWidget}>New Widget</button>
+    <div className="top-banner-content">
+      <button onClick={onAddWidget}>New Widget</button>
+      <UploadGeo />
+    </div>
   </div>
 );
 

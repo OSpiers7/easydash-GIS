@@ -122,7 +122,7 @@ const Dashboard: React.FC = () => {
 
       <div ref={dropZoneRef} className="drop-zone">
 
-        <UploadGeo  />
+       
 
         
         {widgets.map((widget) => (
