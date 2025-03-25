@@ -1,18 +1,23 @@
 import React, { useState } from "react";
-import { FeatureCollection } from "geojson";
+import { Feature, FeatureCollection } from "geojson";
 import "../styles/ChartForm.css"; // Import the CSS file
+import { useSelector } from 'react-redux';
+
 
 interface ChartFormProps {
-  data: FeatureCollection;
   onSelect: (xAttr: string, filters: Record<string, string[]>) => void;
 }
 
-const ChartForm: React.FC<ChartFormProps> = ({ data, onSelect }) => {
+const ChartForm: React.FC<ChartFormProps> = ({ onSelect }) => {
   const [xAttr, setXAttr] = useState<string>("");
   const [filters, setFilters] = useState<Record<string, string[]>>({});
   const [selectedFilterAttr, setSelectedFilterAttr] = useState<string>("");
   const [uniqueValues, setUniqueValues] = useState<string[]>([]);
   const [showFilterOptions, setShowFilterOptions] = useState<boolean>(false);
+
+ 
+  const ReduxKey = useSelector((state: any) => state.geoJsonDataKey);
+  const data = useSelector((state: any) => state.geoJsonData.get(ReduxKey));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +29,7 @@ const ChartForm: React.FC<ChartFormProps> = ({ data, onSelect }) => {
   };
 
   const allProperties = new Set<string>();
-  data.features.forEach((feature) => {
+  data.features.forEach((feature: Feature) => {
     Object.keys(feature.properties || {}).forEach((key) => allProperties.add(key));
   });
 
@@ -35,19 +40,24 @@ const ChartForm: React.FC<ChartFormProps> = ({ data, onSelect }) => {
   const handleFilterAttrChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const attr = e.target.value;
     setSelectedFilterAttr(attr);
+  
     if (attr) {
-      const uniqueVals = [
-        ...new Set(
-          data.features.map((feature) => feature.properties ? feature.properties[attr] : null)
-        ),
-      ];
-      setUniqueValues(uniqueVals);
+      const uniqueVals = Array.from(
+        new Set(
+          data.features
+            .map((feature: Feature) => feature.properties?.[attr])
+            .filter((val: unknown): val is string => typeof val === "string") // Ensure only strings
+        )
+      ) as string[]; // Explicitly cast to string[]
+  
+      setUniqueValues(uniqueVals); // Now TypeScript knows it's a string[]
       setFilters((prevFilters) => ({
         ...prevFilters,
         [attr]: [],
       }));
     }
   };
+  
 
   const handleFilterChange = (attr: string, value: string) => {
     setFilters((prevFilters) => {

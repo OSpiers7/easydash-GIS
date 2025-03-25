@@ -24,7 +24,7 @@ const Dashboard: React.FC = () => {
     // Access the geoJsonData from the Redux store
   const ReduxKey = useSelector((state: any) => state.geoJsonDataKey);
 
-  const geoJsonData = useSelector((state: any) => state.geoJsonData[0] ?? { features: [] });
+
 
 
   console.log("KEY", ReduxKey)
@@ -79,13 +79,16 @@ const Dashboard: React.FC = () => {
   const handleWidgetCreate = (xAttr: string, filters?: Record<string, string[]>) => {
     try {
       if (selectedWidgetType) {
+
+        const localKey = ReduxKey || "defaultKey";
+
         let config;
         if (selectedWidgetType === "bar" || selectedWidgetType === "pie") {
-          config = { xAttr, yAttr: "count", filters }; // Automatically set yAttr to "count"
+          config = { xAttr, yAttr: "count", filters, key: localKey}; // Automatically set yAttr to "count"
         } else if (selectedWidgetType === "table") {
-          config = { attributes: xAttr }; // Assuming xAttr contains comma-separated attributes for table
+          config = { attributes: xAttr, key: localKey }; // Assuming xAttr contains comma-separated attributes for table
         } else {
-          config = { xAttr, yAttr: "count", filters };
+          config = { xAttr, yAttr: "count", filters, key: localKey};
         }
         addWidget(selectedWidgetType, config);
       }
@@ -117,7 +120,7 @@ const Dashboard: React.FC = () => {
 
       <TopBanner onAddWidget={() => {
         setDataSelectionModalOpen(true);
-         dispatch(setSelectedKey(""));
+         
         } } />
 
       <div ref={dropZoneRef} className="drop-zone">
@@ -135,8 +138,11 @@ const Dashboard: React.FC = () => {
             config={widget.config}
             //geoJsonData = {setGeoJsonData}
           />
+
+
         ))}
       </div>
+      
       {/*Modal to select data, still need to create a redux item that keeps track of data. Then go into the widgets call that use effect to access the map */}
       <Modal
         isOpen={isDataSelectionModalOpen}
@@ -168,10 +174,10 @@ const Dashboard: React.FC = () => {
       >
 
         {selectedWidgetType === "bar" && (
-          <ChartForm data={geoJsonData} onSelect={handleWidgetCreate} />
+          <ChartForm onSelect={handleWidgetCreate} />
         )}
         {selectedWidgetType === "pie" && (
-          <ChartForm data={geoJsonData} onSelect={handleWidgetCreate} />
+          <ChartForm onSelect={handleWidgetCreate} />
 
         )}
         {selectedWidgetType === "line" && (

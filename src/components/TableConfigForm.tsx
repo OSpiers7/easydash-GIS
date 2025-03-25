@@ -29,6 +29,8 @@ const TableConfigForm: React.FC<TableConfigFormProps> = ({ onSelect }) => {
   };
 
   const ReduxKey = useSelector((state: any) => state.geoJsonDataKey);
+
+  
   const data = useSelector((state: any) => state.geoJsonData.get(ReduxKey));
 
   console.log("TABLE CONFIG DATA: ", data)

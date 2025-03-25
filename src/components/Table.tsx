@@ -6,12 +6,13 @@ import { useSelector } from 'react-redux';
 // Define the props for the Table component
 interface TableProps {
   selectedFeatures: string; // Add selectedFeatures prop
+  geoJsonKey: string;
 }
 
 // Access geoJsonData from Redux state
 //const geoJsonData = useSelector((state: any) => state.geoJsonData);
 // Define the Table component
-function Table({ selectedFeatures }: TableProps) {
+function Table({ selectedFeatures, geoJsonKey }: TableProps) {
 
 
 
@@ -19,7 +20,7 @@ function Table({ selectedFeatures }: TableProps) {
   const [uniqueValues, setUniqueValues] = useState<any>({});
 
   const ReduxKey = useSelector((state: any) => state.geoJsonDataKey);
-  const geoJsonData = useSelector((state: any) => state.geoJsonData.get(ReduxKey));
+  const geoJsonData = useSelector((state: any) => state.geoJsonData.get(geoJsonKey));
 
   // Split the selectedFeatures string into an array of attributes
   const selectedAttributes = selectedFeatures.split(',');
