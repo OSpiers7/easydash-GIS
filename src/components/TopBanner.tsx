@@ -1,6 +1,5 @@
 import React from "react";
 import "../TopBanner.css";
-import FetchWmsGeoJson from "./FetchWmsGeoJson";
 import UploadGeo from "./GeoJsonUpload";
 
 interface TopBannerProps {
