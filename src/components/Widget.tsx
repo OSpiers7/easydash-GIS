@@ -39,7 +39,7 @@ export const Widget = ({
 
   const bannerRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState({ width: 300, height: 300 });
-  const [position, setPosition] = useState({ x: 200, y: 800 }); // Updated initial position
+  const [position, setPosition] = useState({ x: 200, y: 200 }); // Updated initial position
 
   return (
     <Rnd
