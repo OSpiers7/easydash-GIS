@@ -12,9 +12,7 @@ const TopBanner: React.FC<TopBannerProps> = ({ onAddWidget }) => (
     <div className="top-banner-content">
       <button onClick={onAddWidget}>New Widget</button>
       <UploadGeo />
-{/*
-      <FetchWmsGeoJson />
-*/}
+
     </div>
   </div>
 );
