@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux';
-import { SET_GEOJSON_DATA, SET_GEOJSON_SELECTED_KEY } from './actions';
+import { SET_GEOJSON_DATA, SET_GEOJSON_SELECTED_KEY, SET_SAVE_NAME, SET_SAVE_STATE } from './actions';
 import { FeatureCollection, Geometry, GeoJsonProperties } from 'geojson';
 import { geoJson } from 'leaflet';
 
@@ -35,9 +35,27 @@ switch (action.type){
 
 };
 
+// Initial state for saveState is an array of two empty strings
+const initialSaveState: [string, string] = ["", ""];
+
+const saveStateReducer = (
+  state = initialSaveState,
+  action: { type: string; payload: string }
+) => {
+  switch (action.type) {
+    case SET_SAVE_STATE:
+      return [action.payload, state[1]];
+    case SET_SAVE_NAME:
+      return [state[0], action.payload];
+    default:
+      return state;
+  }
+};
+
 const rootReducer = combineReducers({
   geoJsonData: geoJsonReducer, 
-  geoJsonDataKey: geoJsonKeyReducer
+  geoJsonDataKey: geoJsonKeyReducer,
+  saveState: saveStateReducer
 });
 
 export default rootReducer;

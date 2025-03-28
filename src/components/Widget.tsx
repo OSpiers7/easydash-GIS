@@ -9,37 +9,55 @@ import GeoJSONChart from "./GeoJSONChart";
 import PieChart from "./PieChart";
 import Map from "./Map"; // Import Map component
 
-
+import { useDispatch } from 'react-redux';  // Import useDispatch
 //USE THIS CODE TO ACCESS THE DATA FROM THE REDUX STORE
 import { useSelector } from 'react-redux';
 
 
 export interface WidgetProps {
   id: string;
-  location: Coord;
   onRemove: (id: string) => void;
  // geoJsonData: any;
   type: string; // Add type prop
   config: any; // Add config prop
+  onUpdatePositionSize: (id: string, position: { x: number; y: number }, size: { width: number; height: number }) => void; // Add prop to give size and position to dashboard
 }
 
 export const Widget = ({
   id,
-  location: initialLocation,
   onRemove,
   //geoJsonData,
   type, // Destructure type prop
   config, // Destructure config prop
+  onUpdatePositionSize,
 }: WidgetProps) => {
 
   const ReduxKey = useSelector((state: any) => state.geoJsonDataKey);
+  const SaveState = useSelector((state: any) => state.saveState);
   const geoJsonData = useSelector((state: any) => state.geoJsonData.get(config.key));
-
-  
 
   const bannerRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState({ width: 300, height: 300 });
-  const [position, setPosition] = useState({ x: 200, y: 800 }); // Updated initial position
+  const [position, setPosition] = useState({ x: 200, y: 200 }); // Updated initial position
+
+  useEffect(() => {
+    if(SaveState[0] === "load") {
+      const savedWidgets = localStorage.getItem(SaveState[1]);
+      if (savedWidgets) {
+        const saveData = JSON.parse(savedWidgets);
+        for(let i=0; i<saveData.length; i++)
+          if (saveData[i].id === id) {
+            setPosition(saveData[i].position);
+            setSize(saveData[i].size);
+          }
+      }
+    } else return;
+
+  }, [SaveState]);
+
+  useEffect(() => {
+    onUpdatePositionSize(id, position, size);
+  }, [position, size]);
 
   return (
     <Rnd
@@ -53,7 +71,8 @@ export const Widget = ({
       bounds="parent" // Keep the widget within the Dashboard
       dragHandleClassName="widget-banner"
       onDragStop={(e, d) => {
-        setPosition({ x: d.x, y: d.y }); // Direct drag update
+        const newPosition = new Coord(d.x, d.y);
+        setPosition(newPosition); // Direct drag update
       }}
       onResizeStop={(e, direction, ref, delta, newPosition) => {
         setSize({ width: parseInt(ref.style.width, 10), height: parseInt(ref.style.height, 10) });

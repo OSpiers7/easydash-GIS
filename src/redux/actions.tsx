@@ -15,3 +15,17 @@ export const setSelectedKey = (key: string) => ({
   type: SET_GEOJSON_SELECTED_KEY,
   payload: key,
 });
+
+export const SET_SAVE_STATE = 'SET_SAVE_STATE';
+
+export const setSaveState = (state: string) => ({
+  type: SET_SAVE_STATE,
+  payload: state,
+});
+
+export const SET_SAVE_NAME = 'SET_SAVE_NAME';
+
+export const setSaveName = (name: string) => ({
+  type: SET_SAVE_NAME,
+  payload: name,
+});

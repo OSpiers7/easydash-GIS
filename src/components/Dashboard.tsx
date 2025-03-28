@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import TopBanner from "./TopBanner";
 import { Widget, WidgetProps } from "./Widget";
 import "../Dashboard.css";
@@ -8,7 +8,7 @@ import Modal from "./Modal";
 import WidgetSelectionForm from "./WidgetSelectionForm";
 import ChartForm from "./ChartForm";
 import TableConfigForm from "./TableConfigForm";
-
+import SaveDashboardForm from "./SaveDashboardForm";
 import DataSelectionForm from './DataSelectionForm';
 
 
@@ -16,13 +16,20 @@ import { useDispatch } from 'react-redux';  // Import useDispatch
 import { useSelector } from 'react-redux';
 
 import { FeatureCollection, Feature, Geometry, GeoJsonProperties } from 'geojson';
-import { setGeoJsonData, setSelectedKey } from '../redux/actions';
+import { setGeoJsonData, setSaveState, setSelectedKey } from '../redux/actions';
 
-const Dashboard: React.FC = () => {
+export interface DashboardProps {
+  name: string;
+  onBack: () => void;
+}
+
+const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
 
 
     // Access the geoJsonData from the Redux store
   const ReduxKey = useSelector((state: any) => state.geoJsonDataKey);
+    // Access the saveState from the Redux store
+  const SaveState = useSelector((state: any) => state.saveState);
 
 
 
@@ -37,8 +44,12 @@ const Dashboard: React.FC = () => {
   const [isDataSelectionModalOpen, setDataSelectionModalOpen] = useState(false);
   const [isSelectionModalOpen, setSelectionModalOpen] = useState(false);
   const [isConfigModalOpen, setConfigModalOpen] = useState(false);
+  const [isSaveSelectionModalOpen, setSaveSelectionModalOpen] = useState(false);
   const [selectedWidgetType, setSelectedWidgetType] = useState<string | null>(null);
   const [widgetConfig, setWidgetConfig] = useState<any>(null);
+
+  const [dashboardName, setDashboardName] = useState<string>(name);
+  if(dashboardName === "DefaultValue") setDashboardName("New Dashboard");
 
 
   const [isFeatureSelectionModalOpen, setFeatureSelectionModalOpen] = useState(false);
@@ -51,13 +62,21 @@ const Dashboard: React.FC = () => {
   const addWidget = (type: string, config: any) => {
     const newWidget = {
       id: `widget-${Date.now()}`,
-      location: new Coord(500, 100),
       onRemove: removeWidget,
       type: type,
       config: config,
+      onUpdatePositionSize: updateWidgetPositionSize,
       //geoJsonData: setGeoJsonData
     };
     setWidgets((prevWidgets) => [...prevWidgets, newWidget]);
+  };
+
+  const updateWidgetPositionSize = (id: string, position: { x: number; y: number }, size: { width: number; height: number }) => {
+    setWidgets((prevWidgets) =>
+      prevWidgets.map((widget) =>
+        widget.id === id ? { ...widget, position, size } : widget
+      )
+    );
   };
 
   const removeWidget = (id: string) => {
@@ -106,7 +125,24 @@ const Dashboard: React.FC = () => {
     setDataSelectionModalOpen(false);  // Close data selection modal
     setSelectionModalOpen(true);  // Open widget selection modal
   };
+
+  // This will change the saveState redux variable to begin saving the dashboard with the name
+  const handleSaveForm = (dashName: string) => {
+    dispatch(setSaveState("save")); // Dispatch the action to set the save state
+    setDashboardName(dashName); // Save the dashboard name
+    setSaveSelectionModalOpen(false); // Close the save modal
+  };
   
+  useEffect(() => {
+    if(SaveState[0] === "save") {
+      localStorage.setItem(dashboardName, JSON.stringify(widgets));
+      dispatch(setSaveState("")); // Reset the save state
+    } else if(SaveState[0] === "load") {
+      const savedWidgets = localStorage.getItem(SaveState[1]);
+      if (savedWidgets)
+        setWidgets(JSON.parse(savedWidgets));
+    } else return;
+  }, [SaveState]);
 
   return (
     <div className="dashboard">
@@ -121,7 +157,10 @@ const Dashboard: React.FC = () => {
       <TopBanner onAddWidget={() => {
         setDataSelectionModalOpen(true);
          
-        } } />
+        } } onSaveDashboard={() => {
+          // Change saveState to "saving"
+          setSaveSelectionModalOpen(true);
+        }} onBack={onBack} />
 
       <div ref={dropZoneRef} className="drop-zone">
 
@@ -132,10 +171,10 @@ const Dashboard: React.FC = () => {
           <Widget
             key={widget.id}
             id={widget.id}
-            location={widget.location}
             onRemove={removeWidget}
             type={widget.type}
             config={widget.config}
+            onUpdatePositionSize={updateWidgetPositionSize}
             //geoJsonData = {setGeoJsonData}
           />
 
@@ -188,6 +227,15 @@ const Dashboard: React.FC = () => {
           <TableConfigForm onSelect= {handleWidgetCreate} />
 
         )}
+      </Modal>
+
+      {/* Dashboard Saving Modal */}
+      <Modal
+        isOpen={isSaveSelectionModalOpen}
+        onClose={() => setSaveSelectionModalOpen(false)}
+        title="Enter Dashboard Name"
+      >
+        <SaveDashboardForm onEnter={handleSaveForm} curDashName={dashboardName} />
       </Modal>
     </div>
   );
