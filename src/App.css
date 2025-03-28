@@ -4,6 +4,11 @@
   max-height: 100vh;
 }
 
+body, #root {
+  color: black !important;
+  background-color: white; /* Ensures the background isn't affecting text readability */
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
