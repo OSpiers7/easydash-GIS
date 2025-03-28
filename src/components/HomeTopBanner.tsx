@@ -1,6 +1,6 @@
 import React from "react";
 import "../TopBanner.css";
-import FetchWmsGeoJson from "./FetchWmsGeoJson";
+//import FetchWmsGeoJson from "./FetchWmsGeoJson";
 import UploadGeo from "./GeoJsonUpload";
 
 const HomeTopBanner: React.FC = () => (
