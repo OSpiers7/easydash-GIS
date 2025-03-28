@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import "../App.css";
+import "../styles/App.css";
 import { Coord } from "../Utils";
 import { Rnd } from "react-rnd";
 import WidgetBanner from "./WidgetBanner";

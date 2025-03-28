@@ -1,5 +1,5 @@
 import React from 'react';
-import '../styles/Modal.css'; // Ensure you have appropriate CSS for the modal
+import '../styles/App.css'; // Ensure you have appropriate CSS for the modal
 
 interface ModalProps {
   isOpen: boolean;

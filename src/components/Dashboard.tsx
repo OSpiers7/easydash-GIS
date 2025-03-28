@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import TopBanner from "./TopBanner";
 import { Widget, WidgetProps } from "./Widget";
-import "../Dashboard.css";
+import "../Styles/App.css";
 import { Coord } from "../Utils";
 import UploadGeo from "./GeoJsonUpload";
 import Modal from "./Modal";

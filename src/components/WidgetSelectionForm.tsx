@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../styles/WidgetSelectionForm.css"; // Import the CSS file for styling
+import "../styles/App.css"; // Import the CSS file for styling
 
 interface WidgetSelectionFormProps {
   onSelect: (chartType: string) => void;

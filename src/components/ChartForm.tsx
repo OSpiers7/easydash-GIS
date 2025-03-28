@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Feature, FeatureCollection } from "geojson";
-import "../styles/ChartForm.css"; // Import the CSS file
+import "../styles/App.css"; // Import the CSS file
 import { useSelector } from 'react-redux';
 
 
@@ -73,7 +73,18 @@ const ChartForm: React.FC<ChartFormProps> = ({ onSelect }) => {
 
   return (
     <form onSubmit={handleSubmit} className="chart-form">
-      <h3>Configure Chart</h3>
+      <h3>Chart Configuration</h3>
+      <label className="form-label">
+        X-Axis Attribute:
+        <select value={xAttr} onChange={(e) => setXAttr(e.target.value)} className="form-select">
+          <option value="">Select an attribute</option>
+          {[...allProperties].map((prop) => (
+            <option key={prop} value={prop}>
+              {prop}
+            </option>
+          ))}
+        </select>
+      </label>
       <button type="button" onClick={handleAddFilter} className="form-button">
         Add Filter
       </button>
@@ -112,17 +123,7 @@ const ChartForm: React.FC<ChartFormProps> = ({ onSelect }) => {
           )}
         </>
       )}
-      <label className="form-label">
-        X-Axis Attribute:
-        <select value={xAttr} onChange={(e) => setXAttr(e.target.value)} className="form-select">
-          <option value="">Select an attribute</option>
-          {[...allProperties].map((prop) => (
-            <option key={prop} value={prop}>
-              {prop}
-            </option>
-          ))}
-        </select>
-      </label>
+      
       <button type="submit" className="form-button">Create Chart</button>
     </form>
   );
