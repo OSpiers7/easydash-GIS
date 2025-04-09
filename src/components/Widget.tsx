@@ -35,6 +35,7 @@ export const Widget = ({
   const ReduxKey = useSelector((state: any) => state.geoJsonDataKey);
   const SaveState = useSelector((state: any) => state.saveState);
   const geoJsonData = useSelector((state: any) => state.geoJsonData.get(config.key));
+  const mapData = useSelector((state: any) => state.geoJsonData);
 
   const bannerRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState({ width: 300, height: 300 });
@@ -113,7 +114,7 @@ export const Widget = ({
           {type === "pie" && <PieChart data={geoJsonData} xAttr={config.xAttr} filters={config.filters} />}
           {type === "line" && <p>Line chart not implemented yet.</p>}
           {type === "table" && <Table selectedFeatures={config.attributes} geoJsonKey={config.key} />}
-          {type === "map" && <Map geoJsonData={geoJsonData} />} {/* Render Map component */}
+          {type === "map" && <Map data={mapData} />}
 
         </div>
       </div>

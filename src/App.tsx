@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./App.css";
-import './chartjs-setup';
+import "./chartjs-setup";
+import "bootstrap/dist/css/bootstrap.min.css";
 import GeoJSONUpload from "./components/GeoJsonUpload";
 import Dashboard from "./components/Dashboard";
 import HomePage from "./components/HomePage";

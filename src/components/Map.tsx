@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
+import { FeatureCollection, Feature } from 'geojson';
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import MapFilter from "./MapFilter";
 
 interface MapProps {
-  geoJsonData: GeoJSON.FeatureCollection;
+  data: Map<string, GeoJSON.FeatureCollection>;
 }
 
 //Circle Marker Styling
@@ -13,83 +15,113 @@ const geojsonMarkerOptions: L.CircleMarkerOptions = {
   fillOpacity: 1,
 };
 
-const Map: React.FC<MapProps> = ({ geoJsonData }) => {
-    //Used for properly centering the map
-    const [center, setCenter] = useState<L.LatLng | null>(null);
-    useEffect(() => {
-        if (geoJsonData.features.length > 0) {
-          const firstFeature = geoJsonData.features[0];
-          if (firstFeature.geometry.type === "Point") {
-            const [lng, lat] = firstFeature.geometry.coordinates;
-            setCenter(new L.LatLng(lat, lng)); // Set the map center based on the first feature
-          } else if (firstFeature.geometry.type === "Polygon" || firstFeature.geometry.type === "MultiPolygon") {
-            // If the geometry is a polygon, you can compute the center of the bounds
-            const bounds = L.geoJSON(firstFeature).getBounds();
-            setCenter(bounds.getCenter());
-          }
+const Map: React.FC<MapProps> = ({ data }) => {
+  const [filteredFiles, setFilteredFiles] = useState<string[]>([]);
+  const [fileProperties, setFileProperties] = useState<{ [key: string]: string[] }>({});
+  const [filteredProperties, setFilteredProperties] = useState<{ [key: string]: string[] }>({});
+  //const [isHovered, setIsHovered] = useState (false);
+  //const [center, setCenter] = useState<L.LatLng | null>(null);
+
+  useEffect(() => {
+    setFileProperties(getProperties());
+  }, [data]);
+
+  //Extract all feature properties within a specified file
+  const getProperties = () => {
+    const propertiesByFile: { [key: string]: string[] } = {};
+  
+    Array.from(data.entries()).forEach(([fileName, featureCollection]) => {
+      const propertySet = new Set<string>();
+  
+      featureCollection.features.forEach((feature) => {
+        if (feature?.properties) {
+          Object.keys(feature.properties).forEach((key) => {
+            propertySet.add(key);
+          });
         }
-        setGeoJsonKey((prevKey) => prevKey + 1);
-      }, [geoJsonData]);
+      });
+  
+      propertiesByFile[fileName] = Array.from(propertySet);
+    });
+  
+    return propertiesByFile;
+  };
 
-    //Used for setting unique keys and allowing dynamic reload of map
-    const [geoJsonKey, setGeoJsonKey] = useState(0);
-    useEffect(() => {
-        setGeoJsonKey((prevKey) => prevKey + 1);
-    }, [geoJsonData]);
-    
-    //Convert point features into Leaflet circle markers
-    const pointToLayer = (_feature: any, latlng: L.LatLng) => {
-        return L.circleMarker(latlng, geojsonMarkerOptions);
-    };
+  //Convert point features into Leaflet circle markers
+  const pointToLayer = (_feature: any, latlng: L.LatLng) => {
+    return L.circleMarker(latlng, geojsonMarkerOptions);
+  };
 
-    //Bind popups to each feature
-    const onEachFeature = (feature: any, layer: L.Layer) => {
+  //Bind popups to each feature
+  const onEachFeature = (feature: Feature, layer: L.Layer, fileName: string) => {
     if (feature.properties) {
       let popUpContent = "";
+  
       for (const key in feature.properties) {
-        popUpContent += `<p>${key}: ${feature.properties[key]}</p>`;
+        if (filteredProperties[fileName]?.includes(key)) {
+          popUpContent += `<p>${key}: ${feature.properties[key]}</p>`;
+        }
       }
-      layer.bindPopup(popUpContent);
+  
+      if (popUpContent) {
+        layer.bindPopup(popUpContent);
+      }
     }
-    };
+  };
 
-    //Centers the map to the uploaded geoJson data
-    const MapCenterUpdater = () => {
-        const map = useMap();
-        useEffect(() => {
-          if (center) {
-            map.setView(center, map.getZoom(), { animate: true });
-          }
-        }, [center, map]);
-    
-        return null;
-      };
+  //Applies filter of file names to the map (essentially allows user to toggle between different layers of the map)
+  const handleFileFilterSelect = (filteredFiles: string[]) => {
+    setFilteredFiles(filteredFiles);
+  }
 
-  //Returned MapContainer
+  //Applies filter of properties
+  const handlePropertyFilterSelect = (checkedProperties: { [fileName: string]: string[] }) => {
+    setFilteredProperties(checkedProperties);
+  }
+
   return (
-    <MapContainer
-      center={[37.0902, -95.7129]}
-      zoom={7}
-      minZoom={3}
-      maxZoom={19}
-      style={{ height: "100vh", width: "100%" }}
-    >
-      <TileLayer
-        url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution='&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        noWrap={true}
-        maxZoom={19}
-      />
-      {geoJsonData && (
-        <GeoJSON
-            key={geoJsonKey}
-            data={geoJsonData} 
-            pointToLayer={pointToLayer} 
-            onEachFeature={onEachFeature} 
+    <div style={{ height: "100%", width: "100%" }} className="position-relative">
+      <div 
+        className="position-absolute top-0 end-0 m-3"
+        style={{ zIndex: 1000, maxHeight: "80%", overflowY: "auto"}}
+        //onMouseEnter={() => setIsHovered(true)}
+        //onMouseLeave={() => setIsHovered(false)}
+      >
+        <MapFilter
+          fileProperties={fileProperties}
+          fileNames={Array.from(data.keys())}
+          onFileFilterSelect={handleFileFilterSelect}
+          onPropertiesFilterSelect={handlePropertyFilterSelect}
         />
-      )}
-      <MapCenterUpdater />
-    </MapContainer>
+      </div>
+
+      <MapContainer
+        center={[37.0902, -95.7129]}
+        zoom={7}
+        minZoom={3}
+        maxZoom={19}
+        style={{ height: "100%", width: "100%" }}
+      >
+        <TileLayer
+          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='© OpenStreetMap'
+        />
+
+        {Array.from(data)
+        .filter(([fileName, _geoJsonData]) => filteredFiles.includes(fileName))
+        .map(([fileName, geoJsonData]) => (
+          <GeoJSON
+            key={`${fileName}-${JSON.stringify(filteredProperties[fileName])}`}
+            data={geoJsonData}
+            pointToLayer={pointToLayer}
+            onEachFeature={(feature, layer) => onEachFeature(feature, layer, fileName)}
+            style={(feature) => ({
+              pane: feature?.geometry.type === "Point" ? "markerPane" : "overlayPane",
+            })}
+          />
+        ))}
+      </MapContainer>
+    </div>
   );
 };
 
