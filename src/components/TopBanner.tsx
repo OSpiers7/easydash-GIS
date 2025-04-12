@@ -1,6 +1,7 @@
 import React from "react";
 import "../TopBanner.css";
 import UploadGeo from "./GeoJsonUpload";
+import WMSupload from "./WMSupload";
 
 interface TopBannerProps {
   onAddWidget: () => void;
@@ -30,6 +31,9 @@ const TopBanner: React.FC<TopBannerProps> = ({ onAddWidget, onSaveDashboard, onB
       <button onClick={onAddWidget}>New Widget</button>
       <button className="save-dashboard" onClick={onSaveDashboard}>Save Dashboard</button>
       <UploadGeo />
+      
+      <WMSupload />
+
 
     </div>
   </div>
