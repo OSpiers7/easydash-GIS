@@ -57,11 +57,13 @@ interface UserAuthState {
   isAuthenticated: boolean;
 }
 
+// Initial state for user authentication
 const initialAuthState: UserAuthState = {
   email: '',
   isAuthenticated: false,
 };
 
+// Reducer for user authentication
 const userAuthReducer = (
   state = initialAuthState,
   action: { type: string; payload?: UserAuthState }
@@ -88,6 +90,8 @@ const rootReducer = combineReducers({
 
 export default rootReducer;
 
+// Selector for checking if the user is logged in
 export const selectIsUserLoggedIn = (state: any): boolean => state.userAuth.isAuthenticated;
 
+// Selector for getting the user's email
 export const selectUserEmail = (state: any): string => state.userAuth.email;

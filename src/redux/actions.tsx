@@ -33,16 +33,19 @@ export const setSaveName = (name: string) => ({
 export const SET_USER_AUTH = 'SET_USER_AUTH';
 export const CLEAR_USER_AUTH = 'CLEAR_USER_AUTH';
 
+// Define the structure of user authentication data
 interface UserAuth {
   email: string;
   isAuthenticated: boolean;
 }
 
+// Action creator for setting user authentication
 export const setUserAuth = (userData: UserAuth) => ({
   type: SET_USER_AUTH,
   payload: userData,
 });
 
+// Action creator for clearing user authentication
 export const clearUserAuth = () => ({
   type: CLEAR_USER_AUTH,
 });
