@@ -2,6 +2,7 @@ import React from "react";
 import "../TopBanner.css";
 //import FetchWmsGeoJson from "./FetchWmsGeoJson";
 import UploadGeo from "./GeoJsonUpload";
+import Menu from "./Menu";
 
 const HomeTopBanner: React.FC = () => (
   <div className="top-banner">
@@ -11,6 +12,7 @@ const HomeTopBanner: React.FC = () => (
 {/*
       <FetchWmsGeoJson />
 */}
+      <Menu />
     </div>
   </div>
 );

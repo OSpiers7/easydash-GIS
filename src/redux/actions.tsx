@@ -29,3 +29,20 @@ export const setSaveName = (name: string) => ({
   type: SET_SAVE_NAME,
   payload: name,
 });
+
+export const SET_USER_AUTH = 'SET_USER_AUTH';
+export const CLEAR_USER_AUTH = 'CLEAR_USER_AUTH';
+
+interface UserAuth {
+  email: string;
+  isAuthenticated: boolean;
+}
+
+export const setUserAuth = (userData: UserAuth) => ({
+  type: SET_USER_AUTH,
+  payload: userData,
+});
+
+export const clearUserAuth = () => ({
+  type: CLEAR_USER_AUTH,
+});
