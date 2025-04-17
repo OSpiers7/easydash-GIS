@@ -1,6 +1,7 @@
 import { FeatureCollection, Geometry, GeoJsonProperties } from 'geojson';
 import { useDispatch, useSelector } from 'react-redux';
 import { setGeoJsonData } from '../redux/actions';
+import { supabase } from '../supabaseClient';
 
 function UploadGeo() {
   const dispatch = useDispatch();
@@ -22,11 +23,27 @@ function UploadGeo() {
     const readers = validFiles.map((file) => {
       return new Promise<[string, FeatureCollection<Geometry, GeoJsonProperties>]>((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = () => {
+        reader.onload = async () => {
           try {
             const result = reader.result;
             if (typeof result === 'string') {
               const parsedData = JSON.parse(result) as FeatureCollection<Geometry, GeoJsonProperties>;
+
+              // Upload to Supabase (replace if exists)
+              const blob = new Blob([JSON.stringify(parsedData)], { type: 'application/geo+json' });
+
+              // Upload data to Supabase
+              const { error: uploadError } = await supabase.storage
+                .from('datasets')
+                .upload(file.name, blob, {
+                  contentType: 'application/geo+json',
+                  upsert: true, // tag to overwrite if file already exists
+                });
+              if (uploadError) {
+                console.error(`Failed to upload ${file.name}:`, uploadError);
+                reject(uploadError.message);
+              }
+
               resolve([file.name, parsedData]);
             } else {
               reject(`Error: file content is not a valid string.`);

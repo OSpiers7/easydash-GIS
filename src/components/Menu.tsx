@@ -1,12 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-import { initializeApp } from "firebase/app";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import "../TopBanner.css";
 import "../styles/Menu.css"
 import Modal from "./Modal";
 import { useDispatch, useSelector } from "react-redux";
 import { setUserAuth, clearUserAuth } from "../redux/actions";
 import { selectIsUserLoggedIn, selectUserEmail } from "../redux/reducers";
+import { supabase } from "../supabaseClient";
 
 const Menu: React.FC = () => {
     const [isDropDownOpen, setIsDropDownOpen] = useState(false);
@@ -19,49 +18,29 @@ const Menu: React.FC = () => {
     const [resetEmailSent, setResetEmailSent] = useState(false);
 
     const ReduxKey = useSelector((state: any) => state.geoJsonDataKey);
-
     const dispatch = useDispatch();
     const isLoggedIn = useSelector(selectIsUserLoggedIn);
     const userEmail = useSelector(selectUserEmail);
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
         dispatch(clearUserAuth());
         setEmail("");
         setPassword("");
     };
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyBenD3gr2Pq3vXDTuOLcumE58IJqpS9fGM",
-        authDomain: "mapstore3-b157b.firebaseapp.com",
-        projectId: "mapstore3-b157b",
-        storageBucket: "mapstore3-b157b.firebasestorage.app",
-        messagingSenderId: "656740174642",
-        appId: "1:656740174642:web:ba7fb17b4c4ca0c94f652b"
-    };
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
 
     const handlePasswordReset = async () => {
         if (!email) {
             setAuthError('Please enter your email address to reset password.');
             return;
         }
-        try {
-            await sendPasswordResetEmail(auth, email);
+        const { error } = await supabase.auth.resetPasswordForEmail(email);
+        if (error) {
+            setAuthError('Failed to send password reset email.');
+            console.error("Password reset error:", error.message);
+        } else {
             setResetEmailSent(true);
             setAuthError(null);
-        } catch (error: any) {
-            switch (error.code) {
-                case 'auth/invalid-email':
-                    setAuthError('Invalid email address format.');
-                    break;
-                case 'auth/user-not-found':
-                    setAuthError('No account found with this email.');
-                    break;
-                default:
-                    setAuthError('Failed to send password reset email.');
-                    console.error("Password reset error:", error);
-            }
         }
     };
 
@@ -74,66 +53,45 @@ const Menu: React.FC = () => {
         setIsFieldEmpty(false);
         setAuthError(null);
         setResetEmailSent(false);
-    
+
         try {
+            let result;
             if (isRegistering) {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                console.log("User registered:", userCredential.user);
-                dispatch(setUserAuth({
-                    email: userCredential.user.email || '',
-                    isAuthenticated: true
-                }));
+                result = await supabase.auth.signUp({
+                    email,
+                    password
+                });
             } else {
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                console.log("User logged in:", userCredential.user);
+                result = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+            }
+
+            const { error, data } = result;
+            if (error) {
+                console.error("Auth error:", error.message);
+                setAuthError(error.message);
+                return;
+            }
+
+            if (data?.user) {
                 dispatch(setUserAuth({
-                    email: userCredential.user.email || '',
+                    email: data.user.email || '',
                     isAuthenticated: true
                 }));
+                setEmail("");
+                setPassword("");
+                setIsLoginModalOpen(false);
             }
-            
-            setEmail("");
-            setPassword("");
-            setIsLoginModalOpen(false);
-            
+
         } catch (error: any) {
-            console.error("Auth error code:", error.code); // Add this for debugging
-            switch (error.code) {
-                case 'auth/invalid-email':
-                    setAuthError('Invalid email address format.');
-                    break;
-                case 'auth/user-not-found':
-                    setAuthError('No user found with this email.');
-                    break;
-                case 'auth/wrong-password':
-                    setAuthError('Incorrect password.');
-                    break;
-                case 'auth/weak-password':
-                    setAuthError('Password should be at least 6 characters.');
-                    break;
-                case 'auth/email-already-exists':
-                case 'auth/email-already-in-use':
-                    setAuthError('Email already registered. Try logging in instead.');
-                    break;
-                case 'auth/too-many-requests':
-                    setAuthError('Too many failed attempts. Please try again later.');
-                    break;
-                case 'auth/operation-not-allowed':
-                    setAuthError('Email/password sign-in is not enabled. Please contact support.');
-                    break;
-                case 'auth/network-request-failed':
-                    setAuthError('Network error. Please check your internet connection.');
-                    break;
-                default:
-                    setAuthError(`Authentication error: ${error.code}`);
-                    console.error("Detailed auth error:", error);
-            }
+            console.error("Unexpected error:", error);
+            setAuthError('Unexpected error occurred. Please try again.');
         }
     };
 
-    // Check if there's a login-related error
     const showForgotPassword = !isRegistering && authError;
-
     const menuRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -142,14 +100,47 @@ const Menu: React.FC = () => {
                 setIsDropDownOpen(false);
             }
         };
-
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    // Add useEffect to check for existing session on mount
+    useEffect(() => {
+        const checkSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.user) {
+                dispatch(setUserAuth({
+                    email: session.user.email || '',
+                    isAuthenticated: true
+                }));
+            }
+        };
+
+        checkSession();
+    }, [dispatch]);
+
+    // You can also listen for auth state changes
+    useEffect(() => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_IN' && session?.user) {
+                dispatch(setUserAuth({
+                    email: session.user.email || '',
+                    isAuthenticated: true
+                }));
+            } else if (event === 'SIGNED_OUT') {
+                dispatch(clearUserAuth());
+            }
+        });
+
+        // Cleanup subscription on unmount
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, [dispatch]);
+
     return (
         <div className="menu-container" ref={menuRef}>
-            <button className="menu-button" onClick={() => {setIsDropDownOpen(!isDropDownOpen)}}>
+            <button className="menu-button" onClick={() => { setIsDropDownOpen(!isDropDownOpen) }}>
                 Menu
             </button>
             {isDropDownOpen && (
@@ -196,21 +187,21 @@ const Menu: React.FC = () => {
                     {isFieldEmpty && <p className="error-message">Email and password cannot be empty</p>}
                     {authError && <p className="error-message">{authError}</p>}
                     {resetEmailSent && <p className="success-message">Password reset email sent! Check your inbox.</p>}
-                    <button 
+                    <button
                         onClick={handleLoginClick}
                         className="primary-button"
                     >
                         {isRegistering ? 'Register' : 'Login'}
                     </button>
                     {showForgotPassword && (
-                        <button 
+                        <button
                             onClick={handlePasswordReset}
                             className="text-button"
                         >
                             Forgot Password?
                         </button>
                     )}
-                    <button 
+                    <button
                         onClick={() => {
                             setIsRegistering(!isRegistering);
                             setAuthError(null);
@@ -224,6 +215,6 @@ const Menu: React.FC = () => {
             </Modal>
         </div>
     );
-}
+};
 
 export default Menu;

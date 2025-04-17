@@ -10,6 +10,7 @@ import ChartForm from "./ChartForm";
 import TableConfigForm from "./TableConfigForm";
 import SaveDashboardForm from "./SaveDashboardForm";
 import DataSelectionForm from './DataSelectionForm';
+import { supabase } from '../supabaseClient';
 
 
 import { useDispatch } from 'react-redux';  // Import useDispatch
@@ -134,8 +135,22 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
   };
   
   useEffect(() => {
+    const uploadToSupabase = async () => {
+      const blob = new Blob([JSON.stringify(widgets)], { type: 'application/json' });
+  
+      const { error } = await supabase.storage
+        .from('dashboards')
+        .upload(`${dashboardName}.json`, blob, {
+          contentType: 'application/json',
+          upsert: true, // tag to overwrite if file already exists
+        });
+  
+      if (error) console.error(`Error uploading ${dashboardName}.json:`, error);
+    };
+
     if(SaveState[0] === "save") {
       localStorage.setItem(dashboardName, JSON.stringify(widgets));
+      uploadToSupabase();
       dispatch(setSaveState("")); // Reset the save state
     } else if(SaveState[0] === "load") {
       const savedWidgets = localStorage.getItem(SaveState[1]);
