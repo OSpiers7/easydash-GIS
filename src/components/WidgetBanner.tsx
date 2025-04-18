@@ -1,5 +1,5 @@
 import React, { forwardRef } from "react";
-import "../WidgetBanner.css"; // Ensure it picks up any necessary styles
+import "../styles/WidgetBanner.css"; // Ensure it picks up any necessary styles
 
 interface WidgetBannerProps {
   id: string;

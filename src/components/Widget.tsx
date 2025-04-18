@@ -17,7 +17,7 @@ import { useSelector } from 'react-redux';
 export interface WidgetProps {
   id: string;
   onRemove: (id: string) => void;
- // geoJsonData: any;
+// geoJsonData: any;
   type: string; // Add type prop
   config: any; // Add config prop
   onUpdatePositionSize: (id: string, position: { x: number; y: number }, size: { width: number; height: number }) => void; // Add prop to give size and position to dashboard
@@ -25,13 +25,14 @@ export interface WidgetProps {
 
 export const Widget = ({
   id,
-  onRemove,
-  //geoJsonData,
+  onRemove//geoJsonData,
+,//geoJsonData,
+
+//geoJsonData,
   type, // Destructure type prop
   config, // Destructure config prop
   onUpdatePositionSize,
 }: WidgetProps) => {
-
   const ReduxKey = useSelector((state: any) => state.geoJsonDataKey);
   const SaveState = useSelector((state: any) => state.saveState);
   const geoJsonData = useSelector((state: any) => state.geoJsonData.get(config.key));
@@ -41,18 +42,18 @@ export const Widget = ({
   const [position, setPosition] = useState({ x: 200, y: 200 }); // Updated initial position
 
   useEffect(() => {
-    if(SaveState[0] === "load") {
+    if (SaveState[0] === "load") {
       const savedWidgets = localStorage.getItem(SaveState[1]);
       if (savedWidgets) {
         const saveData = JSON.parse(savedWidgets);
-        for(let i=0; i<saveData.length; i++)
+        for (let i = 0; i < saveData.length; i++) {
           if (saveData[i].id === id) {
             setPosition(saveData[i].position);
             setSize(saveData[i].size);
           }
+        }
       }
     } else return;
-
   }, [SaveState]);
 
   useEffect(() => {
@@ -76,7 +77,7 @@ export const Widget = ({
       }}
       onResizeStop={(e, direction, ref, delta, newPosition) => {
         setSize({ width: parseInt(ref.style.width, 10), height: parseInt(ref.style.height, 10) });
-        setPosition(newPosition); // Ensures correct positioning when resizing from corners 
+        setPosition(newPosition); // Ensures correct positioning when resizing from corners
       }}
     >
       <div
@@ -105,16 +106,35 @@ export const Widget = ({
             height: "100%",
           }}
         >
-
-          
           {/* Conditionally render content based on widget type */}
-
-          {type === "bar" && <GeoJSONChart data={geoJsonData} xAttr={config.xAttr} yAttr={config.yAttr} filters={config.filters} />}
-          {type === "pie" && <PieChart data={geoJsonData} xAttr={config.xAttr} filters={config.filters} />}
+          {type === "bar" && (
+            <GeoJSONChart
+              data={geoJsonData}
+              xAttr={config.xAttr}
+              yAttr={config.yAttr} // Pass yAttr
+              filters={config.filters}
+              includeNulls={config.includeNulls} // Pass includeNulls
+              buckets={config.buckets} // Pass buckets
+            />
+          )}
+          {type === "pie" && (
+            <PieChart
+              data={geoJsonData}
+              xAttr={config.xAttr}
+              yAttr={config.yAttr} // Pass yAttr
+              filters={config.filters}
+              includeNulls={config.includeNulls} // Pass includeNulls
+              buckets={config.buckets} // Pass buckets
+            />
+          )}
           {type === "line" && <p>Line chart not implemented yet.</p>}
-          {type === "table" && <Table selectedFeatures={config.attributes} geoJsonKey={config.key} />}
+          {type === "table" && (
+            <Table
+              selectedFeatures={config.attributes}
+              geoJsonKey={config.key}
+            />
+          )}
           {type === "map" && <Map geoJsonData={geoJsonData} />} {/* Render Map component */}
-
         </div>
       </div>
     </Rnd>

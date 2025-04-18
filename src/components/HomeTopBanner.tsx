@@ -1,5 +1,5 @@
 import React from "react";
-import "../TopBanner.css";
+import "../styles/App.css";
 //import FetchWmsGeoJson from "./FetchWmsGeoJson";
 import UploadGeo from "./GeoJsonUpload";
 

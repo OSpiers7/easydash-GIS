@@ -1,5 +1,5 @@
 import React from "react";
-import "../TopBanner.css";
+import "../styles/App.css";
 import UploadGeo from "./GeoJsonUpload";
 
 interface TopBannerProps {

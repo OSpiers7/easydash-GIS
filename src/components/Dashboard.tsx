@@ -95,19 +95,31 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
     }
   };
 
-  const handleWidgetCreate = (xAttr: string, filters?: Record<string, string[]>) => {
+  const handleWidgetCreate = (
+    xAttr: string,
+    yAttr: string, // Add yAttr parameter
+    filters: Record<string, string[]>,
+    includeNulls: boolean,
+    buckets?: number // Add buckets parameter
+  ) => {
     try {
       if (selectedWidgetType) {
-
         const localKey = ReduxKey || "defaultKey";
 
         let config;
         if (selectedWidgetType === "bar" || selectedWidgetType === "pie") {
-          config = { xAttr, yAttr: "count", filters, key: localKey}; // Automatically set yAttr to "count"
+          config = {
+            xAttr,
+            yAttr, // Include yAttr in the configuration
+            filters,
+            includeNulls,
+            buckets, // Pass buckets to the widget configuration
+            key: localKey,
+          };
         } else if (selectedWidgetType === "table") {
           config = { attributes: xAttr, key: localKey }; // Assuming xAttr contains comma-separated attributes for table
         } else {
-          config = { xAttr, yAttr: "count", filters, key: localKey};
+          config = { xAttr, yAttr: "count", filters, key: localKey }; // Default yAttr for other widgets
         }
         addWidget(selectedWidgetType, config);
       }
@@ -224,7 +236,7 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
         )}
 
         {selectedWidgetType === "table" && (
-          <TableConfigForm onSelect= {handleWidgetCreate} />
+          <TableConfigForm onSelect={(attributes: string) => handleWidgetCreate(attributes, "count", {}, false)} />
 
         )}
       </Modal>

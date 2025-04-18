@@ -158,6 +158,33 @@ input[type="checkbox"] {
   background-color: #0d8ddf; /* Slightly darker blue on hover */
 }
 
+.form-switch {
+  margin-top: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #e1e8ed; /* Light text color for dark mode */
+}
+
+.form-switch input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.form-slider {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: #e1e8ed; /* Light text color for dark mode */
+}
+
+.form-slider input[type="range"] {
+  width: 100%;
+  cursor: pointer;
+}
+
 /* Table styling */
 .table {
   width: 100%;
@@ -219,4 +246,32 @@ input[type="checkbox"] {
   padding: 10px;
   background-color: #192734; /* Match the widget background */
   color: #e1e8ed; /* Light text color */
+}
+.top-banner {
+  width: 100%;
+  height: 60px;
+  background-color: #222;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+.top-banner button {
+  background-color: #444;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 5px;
+}
+
+.top-banner button:hover {
+  background-color: #555;
 }
