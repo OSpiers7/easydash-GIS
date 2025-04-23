@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux';
-import { SET_GEOJSON_DATA, SET_GEOJSON_SELECTED_KEY, SET_SAVE_NAME, SET_SAVE_STATE } from './actions';
+import { SET_GEOJSON_DATA, SET_GEOJSON_SELECTED_KEY, SET_SAVE_NAME, SET_SAVE_STATE, SET_USER_AUTH, CLEAR_USER_AUTH } from './actions';
 import { FeatureCollection, Geometry, GeoJsonProperties } from 'geojson';
 import { geoJson } from 'leaflet';
 
@@ -52,10 +52,46 @@ const saveStateReducer = (
   }
 };
 
+interface UserAuthState {
+  email: string;
+  isAuthenticated: boolean;
+}
+
+// Initial state for user authentication
+const initialAuthState: UserAuthState = {
+  email: '',
+  isAuthenticated: false,
+};
+
+// Reducer for user authentication
+const userAuthReducer = (
+  state = initialAuthState,
+  action: { type: string; payload?: UserAuthState }
+) => {
+  switch (action.type) {
+    case SET_USER_AUTH:
+      return {
+        ...state,
+        ...action.payload,
+      };
+    case CLEAR_USER_AUTH:
+      return initialAuthState;
+    default:
+      return state;
+  }
+};
+
 const rootReducer = combineReducers({
   geoJsonData: geoJsonReducer, 
   geoJsonDataKey: geoJsonKeyReducer,
-  saveState: saveStateReducer
+  saveState: saveStateReducer,
+  userAuth: userAuthReducer,
 });
 
 export default rootReducer;
+
+// Selector for checking if the user is logged in
+export const selectIsUserLoggedIn = (state: any): boolean => state.userAuth.isAuthenticated;
+
+// Selector for getting the user's email
+export const selectUserEmail = (state: any): string => state.userAuth.email;
