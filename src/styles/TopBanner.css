@@ -30,7 +30,11 @@
 .menu-container {
   position: relative;
   display: inline-block;
-  float: right; /* Aligns the menu container to the far right */
+}
+
+.top-banner {
+  display: flex;
+  justify-content: flex-end; /* Aligns the menu container to the far right */
 }
 
 .dropdown-menu {

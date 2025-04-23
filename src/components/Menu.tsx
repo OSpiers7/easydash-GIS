@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import "../TopBanner.css";
+import "../styles/TopBanner.css";
 import "../styles/Menu.css"
 import Modal from "./Modal";
 import { useDispatch, useSelector } from "react-redux";
