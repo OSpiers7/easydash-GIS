@@ -11,6 +11,7 @@ import TableConfigForm from "./TableConfigForm";
 import SaveDashboardForm from "./SaveDashboardForm";
 import DataSelectionForm from './DataSelectionForm';
 import { supabase } from '../supabaseClient';
+import html2canvas from 'html2canvas';
 
 
 import { useDispatch } from 'react-redux';  // Import useDispatch
@@ -145,19 +146,48 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
     setDashboardName(dashName); // Save the dashboard name
     setSaveSelectionModalOpen(false); // Close the save modal
   };
+
+  const captureDashboardScreenshot = async (dashboardElementId: string) => {
+    const element = document.getElementById(dashboardElementId);
+    if (!element) {
+      console.error('Dashboard element not found');
+      return null;
+    }
+    const canvas = await html2canvas(element, { scale: 0.3, backgroundColor: null });
+    const blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob((blob) => {
+        resolve(blob);
+      }, 'image/png');
+    });
+    return blob;
+  };
   
   useEffect(() => {
     const uploadToSupabase = async () => {
-      const blob = new Blob([JSON.stringify(widgets)], { type: 'application/json' });
-  
-      const { error } = await supabase.storage
+      const jsonBlob = new Blob([JSON.stringify(widgets)], { type: 'application/json' });
+
+      // Upload JSON
+      const { error: jsonError } = await supabase.storage
         .from('dashboards')
-        .upload(`${dashboardName}.json`, blob, {
+        .upload(`${dashboardName}.json`, jsonBlob, {
           contentType: 'application/json',
-          upsert: true, // tag to overwrite if file already exists
+          upsert: true,
         });
-  
-      if (error) console.error(`Error uploading ${dashboardName}.json:`, error);
+
+      if (jsonError) console.error(`Error uploading ${dashboardName}.json:`, jsonError);
+
+      // Capture and upload screenshot
+      const screenshotBlob = await captureDashboardScreenshot('dashboard-container'); // your dashboard div id
+      if (!screenshotBlob) return;
+
+      const { error: imageError } = await supabase.storage
+        .from('dashboards')
+        .upload(`${dashboardName}.png`, screenshotBlob, {
+          contentType: 'image/png',
+          upsert: true,
+        });
+
+      if (imageError) console.error(`Error uploading ${dashboardName}.png:`, imageError);
     };
 
     if(SaveState[0] === "save") {
@@ -189,7 +219,7 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
           setSaveSelectionModalOpen(true);
         }} onBack={onBack} />
 
-      <div ref={dropZoneRef} className="drop-zone">
+      <div id="dashboard-container" ref={dropZoneRef} className="drop-zone">
 
        
 

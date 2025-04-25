@@ -27,11 +27,10 @@ const HomePage: React.FC<HomePageProps> = ({ onSelectDashboard }) => {
         // Remove from Supabase storage
         const { error } = await supabase.storage
             .from('dashboards')
-            .remove([`${keyToDelete}.json`]);
+            .remove([`${keyToDelete}.json`, `${keyToDelete}.png`]);
 
         if (error) {
             console.error('Error deleting from Supabase:', error);
-            // You might want to handle this error in the UI
             return;
         }
 
