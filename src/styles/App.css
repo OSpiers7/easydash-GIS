@@ -1,7 +1,8 @@
 /* Root container */
 #root {
-  max-width: 1280px;
-  max-height: 100vh;
+  width: 100vw;
+    /* Full screen width */
+    max-height: 100vh;
   text-align: center;
   background-color: #15202b; /* Dark background similar to Twitter's dark mode */
   color: #e1e8ed; /* Light text color for good contrast */

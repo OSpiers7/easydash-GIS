@@ -2,83 +2,227 @@ import HomeTopBanner from "./HomeTopBanner";
 import "../Dashboard.css";
 import Modal from "./Modal";
 
-import { useDispatch } from 'react-redux';  // Import useDispatch
-import { useSelector } from 'react-redux';
+import { useDispatch } from "react-redux"; // Import useDispatch
+import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { setSaveName, setSaveState } from "../redux/actions";
+import UploadGeo from "./GeoJsonUpload";
+import "bootstrap/dist/css/bootstrap.min.css";
+
+import SplitText from "./SplitText";
+import ShinyText from "./ShinyText";
+import GlassIcons from "./GlassIcons";
+import {
+  FiFileText,
+  FiBook,
+  FiHeart,
+  FiCloud,
+  FiEdit,
+  FiBarChart2,
+} from "react-icons/fi"; // Icons
+import Squares from "./Squares";
+import BarLoader from "./BarLoader";
 
 interface HomePageProps {
-    onSelectDashboard: (key: string) => void;
+  onSelectDashboard: (key: string) => void;
 }
-  
+
 const HomePage: React.FC<HomePageProps> = ({ onSelectDashboard }) => {
-    const [keys, setKeys] = useState<string[]>([]);
+  //the icon for the add item button
 
-    const dispatch = useDispatch();
+  const [keys, setKeys] = useState<string[]>([]);
+  const [showLoader, setShowLoader] = useState(false);
 
-    // Remove the selected key from local storage
-    const handleDeleteKey = (keyToDelete: string) => {
-        localStorage.removeItem(keyToDelete);
-        setKeys((prevKeys) => prevKeys.filter((key) => key !== keyToDelete));
+  const dispatch = useDispatch();
+
+  const handleAnimationComplete = () => {
+    console.log("All letters have animated!");
+  };
+
+  // Remove the selected key from local storage
+  const handleDeleteKey = (keyToDelete: string) => {
+    localStorage.removeItem(keyToDelete);
+    setKeys((prevKeys) => prevKeys.filter((key) => key !== keyToDelete));
+  };
+
+  // Update the selected key in the Redux store
+  const handleButtonClick = (key: string) => {
+    if (key === "DefaultValue") {
+      setShowLoader(true); // show loader fullscreen
+
+      setTimeout(() => {
+        onSelectDashboard(key); // create default dashboard
+        dispatch(setSaveState(""));
+        dispatch(setSaveName(""));
+        setShowLoader(false); // hide loader
+      }, 1000); // adjust delay if needed
+
+      return;
+    }
+    dispatch(setSaveState("load"));
+    dispatch(setSaveName(key));
+    onSelectDashboard(key); // Navigate to dashboard
+  };
+
+  // Access the dashboard keys from the Redux store
+  useEffect(() => {
+    const getAllLocalStorageKeys = () => {
+      const keys = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key) keys.push(key);
+      }
+      return keys;
     };
 
-    // Update the selected key in the Redux store
-    const handleButtonClick = (key: string) => {
-        if(key === "DefaultValue") {
-          onSelectDashboard(key); // Make a new dashboard with default values
-          dispatch(setSaveState(""));
-          dispatch(setSaveName(""));
-          return;
-        }
-        dispatch(setSaveState("load"));
-        dispatch(setSaveName(key));
-        onSelectDashboard(key); // Navigate to dashboard
-    };
-
-    // Access the dashboard keys from the Redux store
-    useEffect(() => {
-        const getAllLocalStorageKeys = () => {
-            const keys = [];
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key) keys.push(key);
-            }
-            return keys;
-        };
-
-        setKeys(getAllLocalStorageKeys());
-    }, []);
+    setKeys(getAllLocalStorageKeys());
+  }, []);
 
   return (
-    <div className="dashboard">
-      <HomeTopBanner />
-      <div className="button-container">
-        <button
-          className="storage-button"
-          onClick={() => handleButtonClick("DefaultValue")}
-        >
-          +
-        </button>
-        {keys.map((key, index) => (
-          <div key={key} style={{ position: "relative", display: "inline-block" }}>
-            <button
-              className="storage-button"
-              onClick={() => handleButtonClick(key)}
+    <div className="w-screen min-h-screen relative ">
+      {showLoader && (
+        <div className="fixed inset-0 z-[9999] bg-black bg-opacity-75 flex items-center justify-center">
+          <BarLoader />
+        </div>
+      )}
+      {/* BACKGROUND LAYER */}
+      <div className="fixed inset-0 z-0 h-full w-full">
+        <Squares
+          speed={0.05}
+          squareSize={80}
+          direction="diagonal"
+          borderColor="#39486e"
+          hoverFillColor="#222"
+        />
+      </div>
+
+      {/* FOREGROUND CONTENT */}
+      <div className="relative z-10">
+        {/* CALL FOR THE TOP BANNER */}
+        <div className="fixed top-0 left-0 w-full z-50 mt-[20px]">
+          <HomeTopBanner />
+        </div>
+
+        <div className="flex justify-center items-start mt-[145px]">
+          <div className="flex flex-col items-center text-center w-full">
+            <ShinyText
+              text="Welcome to"
+              disabled={false}
+              speed={5}
+              className="custom-class text-3xl mb-[-40px] font-semibold"
+            />
+
+            <SplitText
+              text="MapStore3"
+              className="text-[200px] font-semibold text-center mb-[-10px] text-[#FFFFFF] text-shadow-md"
+              delay={150}
+              animationFrom={{
+                opacity: 0,
+                transform: "translate3d(0,50px,0)",
+              }}
+              animationTo={{ opacity: 1, transform: "translate3d(0,0,0)" }}
+              easing="easeOutCubic"
+              threshold={0.2}
+              rootMargin="-50px"
+              onLetterAnimationComplete={handleAnimationComplete}
+            />
+
+            <ShinyText
+              text={
+                "Open-source GIS mapping made simple,\n powerful, and ready for your data."
+              }
+              disabled={false}
+              speed={5}
+              className="custom-class text-3xl font-semibold"
+            />
+          </div>
+        </div>
+
+        {/* Create New Dashboard Section 
+        
+            <div
+              className="ml-[300px]"
+              style={{ height: "200px", position: "relative" }}
             >
-              {key}
-            </button>
+              <GlassIcons items={items} className="custom-class " />
+            </div>
+            
+            */}
+
+        <div className="flex justify-center items-start mt-[80px]">
+          <div className="flex flex-col items-center text-center w-full">
             <button
-              className="delete-button"
-              onClick={() => handleDeleteKey(key)}
-              title={`Delete "${key}"`}
+              className=" text-[25px] rounded-2xl border-2 border-black bg-white px-4 py-[30px] font-semibold uppercase text-black transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:rounded-md hover:shadow-[4px_4px_0px_black] active:translate-x-[0px] active:translate-y-[0px] active:rounded-2xl active:shadow-none"
+              onClick={() => handleButtonClick("DefaultValue")}
             >
-              ✕
+              Create a Dashboard
             </button>
           </div>
-        ))}
+        </div>
+
+        <div className="flex justify-start items-start mt-[200px] w-full">
+          <div className="w-[calc(100vw-400px)] mx-auto">
+            <h3
+              className="text-left w-full text-[white] font-semibold text-[50px]"
+              style={{
+                color: "white",
+                textShadow: `
+      -1px -1px 0 black,
+       1px -1px 0 black,
+      -1px  1px 0 black,
+       1px  1px 0 black
+    `,
+              }}
+            >
+              Load a dashboard
+            </h3>
+
+            <div className="input-group mb-3 w-1/2">
+              <span className="input-group-text" id="inputGroup-sizing-default">
+                Search
+              </span>
+              <input
+                type="text"
+                className="form-control"
+                aria-label="Sizing example input"
+                aria-describedby="inputGroup-sizing-default"
+              ></input>
+            </div>
+
+            {keys.length === 0 ? (
+              <div className="alert alert-warning" role="alert">
+                No available dashboards
+              </div>
+            ) : (
+              keys.map((key, index) => (
+                <div
+                  key={key}
+                  style={{
+                    position: "relative",
+                    display: "inline-block",
+                  }}
+                >
+                  <button
+                    className="storage-button"
+                    onClick={() => handleButtonClick(key)}
+                  >
+                    {key}
+                  </button>
+                  <button
+                    className="delete-button"
+                    onClick={() => handleDeleteKey(key)}
+                    title={`Delete "${key}"`}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
-}
+};
 
 export default HomePage;

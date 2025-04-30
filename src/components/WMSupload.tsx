@@ -82,15 +82,6 @@ return (
       />
       <button
       type = "submit"
-        style={{
-          display: "inline-block",
-          backgroundColor: "gray",
-          color: "white",
-          padding: "10px 20px",
-          borderRadius: "5px",
-          cursor: "pointer",
-          textAlign: "center",
-        }}
       >
         Upload WMS link
       </button>

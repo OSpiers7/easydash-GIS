@@ -58,22 +58,8 @@ function UploadGeo() {
         multiple
         onChange={handleFileChange}
         id="upload-geo"
-        style={{ display: "none" }}
       />
-      <label
-        htmlFor="upload-geo"
-        style={{
-          display: "inline-block",
-          backgroundColor: "gray",
-          color: "white",
-          padding: "10px 20px",
-          borderRadius: "5px",
-          cursor: "pointer",
-          textAlign: "center",
-        }}
-      >
-        Upload Geo
-      </label>
+      <label htmlFor="upload-geo">Upload Geo</label>
     </>
   );
 }

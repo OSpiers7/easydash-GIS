@@ -1,12 +1,8 @@
-
 import React, { useRef, useState } from "react";
 import { motion } from "framer-motion";
 
-import UploadGeo from "./GeoJsonUpload";
-import WMSupload from "./WMSupload";
 
-
-const TopBanner = ({ onAddWidget, onSaveDashboard, onBack, uploadData }) => {
+const HomeTopBanner = () => {
   const [position, setPosition] = useState({
     left: 0,
     width: 0,
@@ -23,33 +19,20 @@ const TopBanner = ({ onAddWidget, onSaveDashboard, onBack, uploadData }) => {
       }}
       className="relative mx-auto flex w-fit rounded-full border-2 border-black bg-white p-1"
     >
-      <Tab setPosition={setPosition} onClick={onBack}>
-        Home
-      </Tab>
-
-      <Tab setPosition={setPosition} onClick={onAddWidget}>
-        New
-      </Tab>
-      <Tab setPosition={setPosition} onClick={onSaveDashboard}>
-        Save
-      </Tab>
-
-      <Tab setPosition={setPosition} onClick={uploadData}>Upload</Tab>
-
+      <Tab setPosition={setPosition}>Home</Tab>
       <Tab setPosition={setPosition}>Log In</Tab>
-
+  
       <Cursor position={position} />
     </ul>
   );
 };
 
-const Tab = ({ children, setPosition, onClick }) => {
+const Tab = ({ children, setPosition }) => {
   const ref = useRef(null);
 
   return (
     <li
       ref={ref}
-      onClick={onClick ? onClick : undefined}
       onMouseEnter={() => {
         if (!ref?.current) return;
 
@@ -79,6 +62,5 @@ const Cursor = ({ position }) => {
   );
 };
 
-export default TopBanner;
 
-
+export default HomeTopBanner;
