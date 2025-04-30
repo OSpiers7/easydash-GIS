@@ -113,7 +113,11 @@ const Map: React.FC<MapProps> = ({ data }) => {
   };
 
   return (
-    <div ref={containerRef} style={{ height: "80%", width: "80%" }} className="position-relative">
+    <div ref={containerRef} style={{
+      height: "calc(100% - 25px)", // Subtract banner height
+      width: "100%",
+      marginTop: "25px"
+    }} className="position-relative">
       <button
         className="btn btn-light rounded shadow position-absolute top-0 end-0 m-3"
         style={{ zIndex: "1000", display: isClicked ? "none" : "block" }}
