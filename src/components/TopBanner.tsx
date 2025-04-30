@@ -5,8 +5,20 @@ import { motion } from "framer-motion";
 import UploadGeo from "./GeoJsonUpload";
 import WMSupload from "./WMSupload";
 
+interface TopBannerProps {
+  onAddWidget: () => void;
+  onSaveDashboard: () => void;
+  onBack: () => void;
+  uploadData: () => void;
+}
 
-const TopBanner = ({ onAddWidget, onSaveDashboard, onBack, uploadData }) => {
+
+const TopBanner: React.FC<TopBannerProps> = ({
+  onAddWidget,
+  onSaveDashboard,
+  onBack,
+  uploadData,
+}) => {
   const [position, setPosition] = useState({
     left: 0,
     width: 0,
@@ -34,17 +46,30 @@ const TopBanner = ({ onAddWidget, onSaveDashboard, onBack, uploadData }) => {
         Save
       </Tab>
 
-      <Tab setPosition={setPosition} onClick={uploadData}>Upload</Tab>
-
-      <Tab setPosition={setPosition}>Log In</Tab>
+      <Tab setPosition={setPosition} onClick={uploadData}>
+        Upload
+      </Tab>
+      {/*CHANGE THE ONCLICK TO OPEN LOG IN MENU*/}
+      <Tab setPosition={setPosition} onClick={uploadData}>
+        Log In
+      </Tab>
 
       <Cursor position={position} />
     </ul>
   );
-};
 
-const Tab = ({ children, setPosition, onClick }) => {
-  const ref = useRef(null);
+};
+interface TabProps {
+  children: React.ReactNode;
+  setPosition: React.Dispatch<
+    React.SetStateAction<{ left: number; width: number; opacity: number }>
+  >;
+  onClick?: () => void;
+}
+
+const Tab: React.FC<TabProps> = ({ children, setPosition, onClick }) => {
+
+    const ref = useRef<HTMLLIElement>(null);
 
   return (
     <li
@@ -67,8 +92,14 @@ const Tab = ({ children, setPosition, onClick }) => {
     </li>
   );
 };
-
-const Cursor = ({ position }) => {
+interface CursorProps {
+  position: {
+    left: number;
+    width: number;
+    opacity: number;
+  };
+}
+const Cursor: React.FC<CursorProps> = ({ position }) => {
   return (
     <motion.li
       animate={{
