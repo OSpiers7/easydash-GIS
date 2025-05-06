@@ -229,7 +229,6 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
   return (
     <div className="dashboard">
       {/* BACKGROUND LAYER */}
-   
 
       <div className="fixed inset-0 z-0 h-full w-full bg-[url('/world.svg')] bg-cover bg-center">
         {/* The SVG file will act as the background */}
@@ -328,19 +327,23 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
         />
       </div>
 
-      <div id="dashboard-container" ref={dropZoneRef} className="drop-zone">
-          {widgets.map((widget) => (
-            <Widget
-              key={widget.id}
-              id={widget.id}
-              onRemove={removeWidget}
-              type={widget.type}
-              config={widget.config}
-              onUpdatePositionSize={updateWidgetPositionSize}
-              //geoJsonData = {setGeoJsonData}
-            />
-          ))}
-        </div>
+      <div
+        id="dashboard-container"
+        ref={dropZoneRef}
+        className="drop-zone mt-4"
+      >
+        {widgets.map((widget) => (
+          <Widget
+            key={widget.id}
+            id={widget.id}
+            onRemove={removeWidget}
+            type={widget.type}
+            config={widget.config}
+            onUpdatePositionSize={updateWidgetPositionSize}
+            //geoJsonData = {setGeoJsonData}
+          />
+        ))}
+      </div>
 
       {/*Modal to select data, still need to create a redux item that keeps track of data. Then go into the widgets call that use effect to access the map */}
       <Modal
