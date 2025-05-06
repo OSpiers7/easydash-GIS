@@ -140,16 +140,9 @@ const HomePage: React.FC<HomePageProps> = ({ onSelectDashboard }) => {
         </div>
       )}
       {/* BACKGROUND LAYER */}
-      <div className="fixed inset-0 z-0 h-full w-full">
-        <Squares
-          speed={0.05}
-          squareSize={80}
-          direction="diagonal"
-          borderColor="#39486e"
-          hoverFillColor="#222"
-        />
+      <div className="fixed inset-0 z-0 h-full w-full bg-[url('/world.svg')] bg-cover bg-center">
+        {/* The SVG file will act as the background */}
       </div>
-
       {/* FOREGROUND CONTENT */}
       <div className="relative z-10">
         {/* CALL FOR THE TOP BANNER */}

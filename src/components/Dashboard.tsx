@@ -228,14 +228,10 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
   return (
     <div className="w-screen min-h-screen relative ">
       {/* BACKGROUND LAYER */}
-      <div className="fixed inset-0 z-0 h-full w-full">
-        <Squares
-          speed={0.05}
-          squareSize={80}
-          direction="diagonal"
-          borderColor="#fff"
-          hoverFillColor="#222"
-        />
+   
+
+      <div className="fixed inset-0 z-0 h-full w-full bg-[url('/world.svg')] bg-cover bg-center">
+        {/* The SVG file will act as the background */}
       </div>
 
       {/* FOREGROUND CONTENT */}
@@ -337,12 +333,11 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
           <UploadGeo />
           <WMSupload />
         </Modal>
- 
+
         <Menu
           isDropDownOpen={isDropDownOpen}
           setIsDropDownOpen={setIsDropDownOpen}
         />
-        
       </div>
 
       {/*Modal to select data, still need to create a redux item that keeps track of data. Then go into the widgets call that use effect to access the map */}
