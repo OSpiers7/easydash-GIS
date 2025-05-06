@@ -133,7 +133,7 @@ const HomePage: React.FC<HomePageProps> = ({ onSelectDashboard }) => {
       {/* BACKGROUND LAYER */}
       <div className="fixed inset-0 z-0 w-full min-h-full bg-[#181818] bg-[length:40px_40px] bg-[url('/world.svg'),linear-gradient(to_right,#ffffff11_1px,transparent_1px),linear-gradient(to_bottom,#ffffff11_1px,transparent_1px)] bg-cover bg-center ">
         {/* The SVG file will act as the background */}
-   </div>
+      </div>
       {/* FOREGROUND CONTENT */}
       <div className="relative z-10">
         {/* CALL FOR THE TOP BANNER */}
@@ -151,8 +151,8 @@ const HomePage: React.FC<HomePageProps> = ({ onSelectDashboard }) => {
             />
 
             <SplitText
-              text="MapStore3"
-              className="text-[200px] font-semibold text-center mb-[-10px] text-[#FFFFFF] text-shadow-md"
+              text="Easy-Dash"
+              className="text-[200px] font-semibold text-center mb-[-10px] text-[#D8CAB8] text-shadow-md"
               delay={150}
               animationFrom={{
                 opacity: 0,
@@ -190,7 +190,7 @@ const HomePage: React.FC<HomePageProps> = ({ onSelectDashboard }) => {
         <div className="flex justify-center items-start mt-[80px]">
           <div className="flex flex-col items-center text-center w-full">
             <button
-              className=" text-[25px] rounded-2xl border-2 border-black bg-white px-4 py-[30px] font-semibold uppercase text-black transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:rounded-md hover:shadow-[4px_4px_0px_black] active:translate-x-[0px] active:translate-y-[0px] active:rounded-2xl active:shadow-none"
+              className=" text-[25px] rounded-2xl border-2 border-black bg-[#F0B5A3] px-4 py-[30px] font-semibold uppercase text-black transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:rounded-md hover:shadow-[4px_4px_0px_black] hover:bg-[#F0B5A3] active:translate-x-[0px] active:translate-y-[0px] active:rounded-2xl active:shadow-none"
               onClick={() => handleButtonClick("DefaultValue")}
             >
               Create a Dashboard
@@ -200,22 +200,11 @@ const HomePage: React.FC<HomePageProps> = ({ onSelectDashboard }) => {
 
         <div className="flex justify-start items-start mt-[200px] w-full">
           <div className="w-[calc(100vw-400px)] mx-auto">
-            <h3
-              className="text-left w-full text-[white] font-semibold text-[50px]"
-              style={{
-                color: "white",
-                textShadow: `
-                   -1px -1px 0 black,
-                    1px -1px 0 black,
-                     -1px  1px 0 black,
-                       1px  1px 0 black
-                        `,
-              }}
-            >
+            <h3 className="text-center w-full text-[#D8CAB8] font-semibold text-[50px]">
               Load a dashboard
             </h3>
 
-            <div className="input-group mb-3 w-1/2">
+            <div className="input-group mb-3 ">
               <span className="input-group-text" id="inputGroup-sizing-default">
                 Search
               </span>

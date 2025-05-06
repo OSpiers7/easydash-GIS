@@ -106,18 +106,30 @@ const PieChart: React.FC<PieChartProps> = ({ data, xAttr, yAttr, filters, includ
             "#9966FF",
             "#FF9F40",
           ],
+          borderColor: "black", // <-- black borders
+          borderWidth: 1,
         },
       ],
     };
-
-    const options = {
-      plugins: {
-        title: {
-          display: true,
-          text: `${xAttr} vs ${yAttr}`,
-        },
+    
+const options = {
+  plugins: {
+    title: {
+      display: true,
+      text: `${xAttr} vs ${yAttr}`,
+      color: "black", // Title text color
+    },
+    legend: {
+      labels: {
+        color: "black", // Legend label color
       },
-    };
+    },
+    tooltip: {
+      bodyColor: "black", // Tooltip text color
+      titleColor: "black", // Tooltip title color
+    },
+  },
+};
 
     return <Pie data={chartData} options={options} />;
   } catch (error) {

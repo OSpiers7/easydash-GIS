@@ -77,7 +77,10 @@ export const Widget = ({
         setPosition(newPosition); // Direct drag update
       }}
       onResizeStop={(e, direction, ref, delta, newPosition) => {
-        setSize({ width: parseInt(ref.style.width, 10), height: parseInt(ref.style.height, 10) });
+        setSize({
+          width: parseInt(ref.style.width, 10),
+          height: parseInt(ref.style.height, 10),
+        });
         setPosition(newPosition); // Ensures correct positioning when resizing from corners
       }}
     >
@@ -89,7 +92,7 @@ export const Widget = ({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "lightblue",
+          backgroundColor: "#D8CAB8",
           borderRadius: "5px",
           position: "relative",
         }}
@@ -129,9 +132,13 @@ export const Widget = ({
             />
           )}
           {type === "line" && <p>Line chart not implemented yet.</p>}
-          {type === "table" && <Table selectedFeatures={config.attributes} geoJsonKey={config.key} />}
+          {type === "table" && (
+            <Table
+              selectedFeatures={config.attributes}
+              geoJsonKey={config.key}
+            />
+          )}
           {type === "map" && <Map data={mapData} />}
-
         </div>
       </div>
     </Rnd>
