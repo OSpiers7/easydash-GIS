@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import TopBanner from "./TopBanner";
 import { Widget, WidgetProps } from "./Widget";
 import "../styles/App.css";
+import "../styles/Dashboard.css";
 import { Coord } from "../Utils";
 import UploadGeo from "./GeoJsonUpload";
 import Modal from "./Modal";
@@ -226,7 +227,7 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
   }, [SaveState]);
 
   return (
-    <div className="w-screen min-h-screen relative ">
+    <div className="dashboard">
       {/* BACKGROUND LAYER */}
    
 
@@ -263,19 +264,6 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
       
         
         */}
-        <div ref={dropZoneRef} className="drop-zone">
-          {widgets.map((widget) => (
-            <Widget
-              key={widget.id}
-              id={widget.id}
-              onRemove={removeWidget}
-              type={widget.type}
-              config={widget.config}
-              onUpdatePositionSize={updateWidgetPositionSize}
-              //geoJsonData = {setGeoJsonData}
-            />
-          ))}
-        </div>
         {/*Modal to select data, still need to create a redux item that keeps track of data. Then go into the widgets call that use effect to access the map */}
         <Modal
           isOpen={isDataSelectionModalOpen}
@@ -339,6 +327,20 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
           setIsDropDownOpen={setIsDropDownOpen}
         />
       </div>
+
+      <div id="dashboard-container" ref={dropZoneRef} className="drop-zone">
+          {widgets.map((widget) => (
+            <Widget
+              key={widget.id}
+              id={widget.id}
+              onRemove={removeWidget}
+              type={widget.type}
+              config={widget.config}
+              onUpdatePositionSize={updateWidgetPositionSize}
+              //geoJsonData = {setGeoJsonData}
+            />
+          ))}
+        </div>
 
       {/*Modal to select data, still need to create a redux item that keeps track of data. Then go into the widgets call that use effect to access the map */}
       <Modal
