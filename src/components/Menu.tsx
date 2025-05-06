@@ -139,81 +139,104 @@ const Menu: React.FC = () => {
     }, [dispatch]);
 
     return (
-        <div className="menu-container" ref={menuRef}>
-            <button className="menu-button" onClick={() => { setIsDropDownOpen(!isDropDownOpen) }}>
-                Menu
-            </button>
-            {isDropDownOpen && (
-                <div className="menu-dropdown">
-                    {!isLoggedIn ? (
-                        <button className="login-button" onClick={() => setIsLoginModalOpen(true)}>
-                            Login
-                        </button>
-                    ) : (
-                        <>
-                            <div className="user-email">{userEmail}</div>
-                            <button className="logout-button" onClick={handleLogout}>
-                                Logout
-                            </button>
-                        </>
-                    )}
-                </div>
+      <div className="menu-container" ref={menuRef}>
+        <button
+          className="menu-button"
+          onClick={() => {
+            setIsDropDownOpen(!isDropDownOpen);
+            console.log("Login button clicked!");
+          }}
+        >
+          Menu
+        </button>
+        {isDropDownOpen && (
+          <div className="menu-dropdown">
+            {!isLoggedIn ? (
+              <button
+                className="login-button"
+                onClick={() => setIsLoginModalOpen(true)}
+              >
+                Login
+              </button>
+            ) : (
+              <>
+                <div className="user-email">{userEmail}</div>
+                <button className="logout-button" onClick={handleLogout}>
+                  Logout
+                </button>
+              </>
             )}
-            <Modal
-                isOpen={isLoginModalOpen}
-                onClose={() => {
-                    setIsLoginModalOpen(false);
-                    setAuthError(null);
-                    setIsFieldEmpty(false);
-                    setResetEmailSent(false);
-                }}
-                title={isRegistering ? "Create Account" : "Login"}
+          </div>
+        )}
+
+        <Modal
+          isOpen={isLoginModalOpen}
+          onClose={() => {
+            setIsLoginModalOpen(false);
+            setAuthError(null);
+            setIsFieldEmpty(false);
+            setResetEmailSent(false);
+          }}
+          title={isRegistering ? "Create Account" : "Login"}
+          // Applying z-index directly here
+        >
+          <div className="modal-form">
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="modal-input"
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="modal-input"
+            />
+            {isFieldEmpty && (
+              <p className="error-message">
+                Email and password cannot be empty
+              </p>
+            )}
+            {authError && <p className="error-message">{authError}</p>}
+            {resetEmailSent && (
+              <p className="success-message">
+                Password reset email sent! Check your inbox.
+              </p>
+            )}
+
+            <button
+              onClick={() => {
+           // Debugging log
+                handleLoginClick(); // Call your login logic here
+              }}
+              className="primary-button"
             >
-                <div className="modal-form">
-                    <input
-                        type="email"
-                        placeholder="Email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="modal-input"
-                    />
-                    <input
-                        type="password"
-                        placeholder="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="modal-input"
-                    />
-                    {isFieldEmpty && <p className="error-message">Email and password cannot be empty</p>}
-                    {authError && <p className="error-message">{authError}</p>}
-                    {resetEmailSent && <p className="success-message">Password reset email sent! Check your inbox.</p>}
-                    <button
-                        onClick={handleLoginClick}
-                        className="primary-button"
-                    >
-                        {isRegistering ? 'Register' : 'Login'}
-                    </button>
-                    {showForgotPassword && (
-                        <button
-                            onClick={handlePasswordReset}
-                            className="text-button"
-                        >
-                            Forgot Password?
-                        </button>
-                    )}
-                    <button
-                        onClick={() => {
-                            setIsRegistering(!isRegistering);
-                            setAuthError(null);
-                            setResetEmailSent(false);
-                        }}
-                        className="text-button"
-                    >
-                        {isRegistering ? 'Already have an account? Login' : 'Need an account? Register'}
-                    </button>
-                </div>
-            </Modal>
-        </div>
+              {isRegistering ? "Register" : "Login"}
+            </button>
+
+            {showForgotPassword && (
+              <button onClick={handlePasswordReset} className="text-button">
+                Forgot Password?
+              </button>
+            )}
+            <button
+              onClick={() => {
+                setIsRegistering(!isRegistering);
+                setAuthError(null);
+                setResetEmailSent(false);
+              }}
+              className="text-button"
+            >
+              {isRegistering
+                ? "Already have an account? Login"
+                : "Need an account? Register"}
+            </button>
+          </div>
+        </Modal>
+      </div>
     );
 };
 

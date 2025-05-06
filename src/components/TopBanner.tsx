@@ -11,6 +11,7 @@ interface TopBannerProps {
   onSaveDashboard: () => void;
   onBack: () => void;
   uploadData: () => void;
+  loginUser: () => void;
 }
 
 
@@ -19,6 +20,7 @@ const TopBanner: React.FC<TopBannerProps> = ({
   onSaveDashboard,
   onBack,
   uploadData,
+  loginUser
 }) => {
   const [position, setPosition] = useState({
     left: 0,
@@ -51,7 +53,7 @@ const TopBanner: React.FC<TopBannerProps> = ({
         Upload
       </Tab>
       {/*CHANGE THE ONCLICK TO OPEN LOG IN MENU*/}
-      <Tab setPosition={setPosition} onClick={uploadData}>
+      <Tab setPosition={setPosition} onClick={loginUser}>
         Log In
       </Tab>
 

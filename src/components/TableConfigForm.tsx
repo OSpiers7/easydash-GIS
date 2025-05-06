@@ -1,17 +1,18 @@
 import React, { useState } from "react";
-import { Feature, FeatureCollection } from "geojson";
-//USE THIS CODE TO ACCESS THE DATA FROM THE REDUX STORE
-import { useSelector } from 'react-redux';
-
+import { Feature } from "geojson";
+import { useSelector } from "react-redux";
 
 interface TableConfigFormProps {
-  onSelect: (attributes: string) => void;
+  onSelect: (
+    xAttr: string,
+    yAttr: string,
+    filters: Record<string, string[]>,
+    includeNulls: boolean,
+    buckets?: number
+  ) => void;
 }
 
 const TableConfigForm: React.FC<TableConfigFormProps> = ({ onSelect }) => {
-
- 
-
   const [selectedAttributes, setSelectedAttributes] = useState<string[]>([]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,21 +26,19 @@ const TableConfigForm: React.FC<TableConfigFormProps> = ({ onSelect }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSelect(selectedAttributes.join(",")); // Pass comma-separated attributes
+
+    // Table only needs xAttr (comma-separated attributes), rest are dummies
+    onSelect(selectedAttributes.join(","), "", {}, false);
   };
 
   const ReduxKey = useSelector((state: any) => state.geoJsonDataKey);
-
-  
   const data = useSelector((state: any) => state.geoJsonData.get(ReduxKey));
 
-  console.log("TABLE CONFIG DATA: ", data)
-  console.log("KEYYY", ReduxKey)
-
-
   const allAttributes = new Set<string>();
-  data.features.forEach((feature: Feature) => {
-    Object.keys(feature.properties || {}).forEach((key) => allAttributes.add(key));
+  data?.features?.forEach((feature: Feature) => {
+    Object.keys(feature.properties || {}).forEach((key) =>
+      allAttributes.add(key)
+    );
   });
 
   return (

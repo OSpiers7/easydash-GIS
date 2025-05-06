@@ -17,7 +17,7 @@ import html2canvas from 'html2canvas';
 
 import Squares from "./Squares";
 import WMSupload from "./WMSupload";
-
+import Menu from "./Menu"
 
 import { useDispatch } from "react-redux"; // Import useDispatch
 import { useSelector } from "react-redux";
@@ -29,6 +29,7 @@ import {
   GeoJsonProperties,
 } from "geojson";
 import { setGeoJsonData, setSaveState, setSelectedKey } from "../redux/actions";
+
 
 export interface DashboardProps {
   name: string;
@@ -55,6 +56,9 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
   );
 
   const [isUploadDataOpen, setUploadDataModalOpen] = useState(false);
+  const [isUserLoginModalOpen, setUserLoginModalOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+    
 
   const [widgetConfig, setWidgetConfig] = useState<any>(null);
 
@@ -245,6 +249,10 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
               // Change saveState to "saving"
               setUploadDataModalOpen(true);
             }}
+            loginUser={() => {
+              // Change saveState to "saving"
+              setIsMenuOpen(true);
+            }}
           />
         </div>
         {/*Origianlly was opening selection widget. Made it open data selection modal
@@ -314,7 +322,6 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
           <SaveDashboardForm
             onEnter={handleSaveForm}
             curDashName={dashboardName}
-
           />
         </Modal>
 
@@ -326,23 +333,22 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
           <UploadGeo />
           <WMSupload />
         </Modal>
+
+              {isMenuOpen && <Menu />}
       </div>
 
-      
       {/*Modal to select data, still need to create a redux item that keeps track of data. Then go into the widgets call that use effect to access the map */}
       <Modal
         isOpen={isDataSelectionModalOpen}
         onClose={() => setDataSelectionModalOpen(false)}
         title="Select Data Set"
       >
-
-        <DataSelectionForm/>
+        <DataSelectionForm />
         <p>Selected Key: {ReduxKey}</p> {/* Display the selected key */}
-        <button onClick={handleDataSelectionComplete}>Confirm</button> {/* Button to confirm and proceed */}
-
+        <button onClick={handleDataSelectionComplete}>Confirm</button>{" "}
+        {/* Button to confirm and proceed */}
       </Modal>
 
-        
       {/* Widget Selection Modal */}
       <Modal
         isOpen={isSelectionModalOpen}
@@ -358,21 +364,22 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
         onClose={() => setConfigModalOpen(false)}
         title="Configure Widget"
       >
-
         {selectedWidgetType === "bar" && (
           <ChartForm onSelect={handleWidgetCreate} />
         )}
         {selectedWidgetType === "pie" && (
           <ChartForm onSelect={handleWidgetCreate} />
-
         )}
         {selectedWidgetType === "line" && (
           <p>Line chart configuration not implemented yet.</p>
         )}
 
         {selectedWidgetType === "table" && (
-          <TableConfigForm onSelect={(attributes: string) => handleWidgetCreate(attributes, "count", {}, false)} />
-
+          <TableConfigForm
+            onSelect={(attributes: string) =>
+              handleWidgetCreate(attributes, "count", {}, false)
+            }
+          />
         )}
       </Modal>
 
@@ -382,8 +389,16 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
         onClose={() => setSaveSelectionModalOpen(false)}
         title="Enter Dashboard Name"
       >
-        <SaveDashboardForm onEnter={handleSaveForm} curDashName={dashboardName} />
+        <SaveDashboardForm
+          onEnter={handleSaveForm}
+          curDashName={dashboardName}
+        />
       </Modal>
+
+
+
+
+
 
     </div>
   );
