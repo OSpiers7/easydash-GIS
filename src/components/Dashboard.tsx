@@ -57,8 +57,10 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
 
   const [isUploadDataOpen, setUploadDataModalOpen] = useState(false);
   const [isUserLoginModalOpen, setUserLoginModalOpen] = useState(false);
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-    
+  //Controls the logic for opening the log in
+  const [isDropDownOpen, setIsDropDownOpen] = useState(false);
 
   const [widgetConfig, setWidgetConfig] = useState<any>(null);
 
@@ -117,7 +119,6 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
     filters: Record<string, string[]>,
     includeNulls: boolean,
     buckets?: number // Add buckets parameter
-
   ) => {
     try {
       if (selectedWidgetType) {
@@ -125,7 +126,6 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
 
         let config;
         if (selectedWidgetType === "bar" || selectedWidgetType === "pie") {
-
           config = {
             xAttr,
             yAttr, // Include yAttr in the configuration
@@ -138,7 +138,6 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
           config = { attributes: xAttr, key: localKey }; // Assuming xAttr contains comma-separated attributes for table
         } else {
           config = { xAttr, yAttr: "count", filters, key: localKey }; // Default yAttr for other widgets
-
         }
         addWidget(selectedWidgetType, config);
       }
@@ -164,14 +163,16 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
     setSaveSelectionModalOpen(false); // Close the save modal
   };
 
-
   const captureDashboardScreenshot = async (dashboardElementId: string) => {
     const element = document.getElementById(dashboardElementId);
     if (!element) {
-      console.error('Dashboard element not found');
+      console.error("Dashboard element not found");
       return null;
     }
-    const canvas = await html2canvas(element, { scale: 0.3, backgroundColor: null });
+    const canvas = await html2canvas(element, {
+      scale: 0.3,
+      backgroundColor: null,
+    });
     const blob = await new Promise<Blob | null>((resolve) => {
       canvas.toBlob((blob: Blob | null) => {
         resolve(blob);
@@ -179,37 +180,42 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
     });
     return blob;
   };
-  
+
   useEffect(() => {
     const uploadToSupabase = async () => {
-      const jsonBlob = new Blob([JSON.stringify(widgets)], { type: 'application/json' });
+      const jsonBlob = new Blob([JSON.stringify(widgets)], {
+        type: "application/json",
+      });
 
       // Upload JSON
       const { error: jsonError } = await supabase.storage
-        .from('dashboards')
+        .from("dashboards")
         .upload(`${dashboardName}.json`, jsonBlob, {
-          contentType: 'application/json',
+          contentType: "application/json",
           upsert: true,
         });
 
-      if (jsonError) console.error(`Error uploading ${dashboardName}.json:`, jsonError);
+      if (jsonError)
+        console.error(`Error uploading ${dashboardName}.json:`, jsonError);
 
       // Capture and upload screenshot
-      const screenshotBlob = await captureDashboardScreenshot('dashboard-container'); // your dashboard div id
+      const screenshotBlob = await captureDashboardScreenshot(
+        "dashboard-container"
+      ); // your dashboard div id
       if (!screenshotBlob) return;
 
       const { error: imageError } = await supabase.storage
-        .from('dashboards')
+        .from("dashboards")
         .upload(`${dashboardName}.png`, screenshotBlob, {
-          contentType: 'image/png',
+          contentType: "image/png",
           upsert: true,
         });
 
-      if (imageError) console.error(`Error uploading ${dashboardName}.png:`, imageError);
+      if (imageError)
+        console.error(`Error uploading ${dashboardName}.png:`, imageError);
     };
 
-    if(SaveState[0] === "save") {
-
+    if (SaveState[0] === "save") {
       localStorage.setItem(dashboardName, JSON.stringify(widgets));
       uploadToSupabase();
       dispatch(setSaveState("")); // Reset the save state
@@ -250,8 +256,7 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
               setUploadDataModalOpen(true);
             }}
             loginUser={() => {
-              // Change saveState to "saving"
-              setIsMenuOpen(true);
+              setIsDropDownOpen(true);
             }}
           />
         </div>
@@ -324,7 +329,6 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
             curDashName={dashboardName}
           />
         </Modal>
-
         <Modal
           isOpen={isUploadDataOpen}
           onClose={() => setUploadDataModalOpen(false)}
@@ -333,8 +337,12 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
           <UploadGeo />
           <WMSupload />
         </Modal>
-
-              {isMenuOpen && <Menu />}
+ 
+        <Menu
+          isDropDownOpen={isDropDownOpen}
+          setIsDropDownOpen={setIsDropDownOpen}
+        />
+        
       </div>
 
       {/*Modal to select data, still need to create a redux item that keeps track of data. Then go into the widgets call that use effect to access the map */}
@@ -394,12 +402,6 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
           curDashName={dashboardName}
         />
       </Modal>
-
-
-
-
-
-
     </div>
   );
 };
