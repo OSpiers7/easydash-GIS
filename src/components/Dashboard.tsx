@@ -330,7 +330,7 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
       <div
         id="dashboard-container"
         ref={dropZoneRef}
-        className="drop-zone mt-4"
+        className="drop-zone mt-[35px]"
       >
         {widgets.map((widget) => (
           <Widget
