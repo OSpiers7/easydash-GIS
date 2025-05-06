@@ -1,38 +1,116 @@
-import React from "react";
-import "../styles/TopBanner.css";
+
+import React, { useRef, useState } from "react";
+import { motion } from "framer-motion";
+
+
 import UploadGeo from "./GeoJsonUpload";
+import WMSupload from "./WMSupload";
 
 interface TopBannerProps {
   onAddWidget: () => void;
   onSaveDashboard: () => void;
-  onBack?: () => void; // Optional back handler
+  onBack: () => void;
+  uploadData: () => void;
 }
 
-const TopBanner: React.FC<TopBannerProps> = ({ onAddWidget, onSaveDashboard, onBack }) => (
-  <div className="top-banner">
-    <div className="top-banner-content">
-    {onBack && (
-        <button
-          onClick={onBack}
-          style={{
-            marginRight: "1rem",
-            background: "#444",
-            color: "#fff",
-            border: "none",
-            borderRadius: "4px",
-            padding: "6px 12px",
-            cursor: "pointer"
-          }}
-        >
-          ← Home
-        </button>
-      )}
-      <button onClick={onAddWidget}>New Widget</button>
-      <button className="save-dashboard" onClick={onSaveDashboard}>Save Dashboard</button>
-      <UploadGeo />
 
-    </div>
-  </div>
-);
+const TopBanner: React.FC<TopBannerProps> = ({
+  onAddWidget,
+  onSaveDashboard,
+  onBack,
+  uploadData,
+}) => {
+  const [position, setPosition] = useState({
+    left: 0,
+    width: 0,
+    opacity: 0,
+  });
+
+  return (
+    <ul
+      onMouseLeave={() => {
+        setPosition((pv) => ({
+          ...pv,
+          opacity: 0,
+        }));
+      }}
+      className="relative mx-auto flex w-fit rounded-full border-2 border-black bg-white p-1"
+    >
+      <Tab setPosition={setPosition} onClick={onBack}>
+        Home
+      </Tab>
+
+      <Tab setPosition={setPosition} onClick={onAddWidget}>
+        New
+      </Tab>
+      <Tab setPosition={setPosition} onClick={onSaveDashboard}>
+        Save
+      </Tab>
+
+      <Tab setPosition={setPosition} onClick={uploadData}>
+        Upload
+      </Tab>
+      {/*CHANGE THE ONCLICK TO OPEN LOG IN MENU*/}
+      <Tab setPosition={setPosition} onClick={uploadData}>
+        Log In
+      </Tab>
+
+      <Cursor position={position} />
+    </ul>
+  );
+
+};
+interface TabProps {
+  children: React.ReactNode;
+  setPosition: React.Dispatch<
+    React.SetStateAction<{ left: number; width: number; opacity: number }>
+  >;
+  onClick?: () => void;
+}
+
+const Tab: React.FC<TabProps> = ({ children, setPosition, onClick }) => {
+
+    const ref = useRef<HTMLLIElement>(null);
+
+  return (
+    <li
+      ref={ref}
+      onClick={onClick ? onClick : undefined}
+      onMouseEnter={() => {
+        if (!ref?.current) return;
+
+        const { width } = ref.current.getBoundingClientRect();
+
+        setPosition({
+          left: ref.current.offsetLeft,
+          width,
+          opacity: 1,
+        });
+      }}
+      className="relative z-10 block cursor-pointer px-3 py-1.5 text-xs uppercase text-white mix-blend-difference md:px-5 md:py-3 md:text-base"
+    >
+      {children}
+    </li>
+  );
+};
+interface CursorProps {
+  position: {
+    left: number;
+    width: number;
+    opacity: number;
+  };
+}
+const Cursor: React.FC<CursorProps> = ({ position }) => {
+  return (
+    <motion.li
+      animate={{
+        ...position,
+      }}
+      className="absolute z-0 h-7 rounded-full bg-black md:h-12"
+    />
+  );
+};
 
 export default TopBanner;
+
+
