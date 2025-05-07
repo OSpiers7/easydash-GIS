@@ -161,7 +161,7 @@ const Map: React.FC<MapProps> = ({ data }) => {
         ref={setMap}
       >
         <TileLayer
-          url="https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg"
+          url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
           attribution="© OpenStreetMap"
         />
 
