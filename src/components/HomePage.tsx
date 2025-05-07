@@ -5,7 +5,7 @@ import Modal from "./Modal";
 import { useDispatch } from "react-redux"; // Import useDispatch
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-import { setSaveName, setSaveState, setUserAuth } from "../redux/actions";
+import { setSaveName, setSaveState, setUserAuth, clearUserAuth } from "../redux/actions";
 import { selectIsUserLoggedIn } from "../redux/reducers";
 
 import { supabase } from "../supabaseClient";
