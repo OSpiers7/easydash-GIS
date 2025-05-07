@@ -26,7 +26,7 @@
   justify-content: center;
   border-radius: 5px;
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
-  cursor: grab;
+  cursor: default;
   transition: background-color 0.2s;
 }
 
@@ -48,4 +48,12 @@
 
 .widget .remove-button:hover {
   background-color: #900;
+}
+
+.widget-banner {
+  cursor: grab;
+}
+
+.disabled-drag-handle .widget-banner {
+  cursor: default !important;
 }

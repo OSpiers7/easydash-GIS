@@ -116,9 +116,8 @@ const Map: React.FC<MapProps> = ({ data }) => {
     <div
       ref={containerRef}
       style={{
-        height: "calc(100% - 25px)", // Subtract banner height
+        height: "100%", // Subtract banner height
         width: "100%",
-        marginTop: "25px",
       }}
       className="position-relative"
     >

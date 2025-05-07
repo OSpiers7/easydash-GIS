@@ -12,7 +12,7 @@ import Map from "./Map"; // Import Map component
 import { useDispatch } from 'react-redux';  // Import useDispatch
 //USE THIS CODE TO ACCESS THE DATA FROM THE REDUX STORE
 import { useSelector } from 'react-redux';
-
+import { selectIsUserLoggedIn } from "../redux/reducers";
 
 export interface WidgetProps {
   id: string;
@@ -37,6 +37,7 @@ export const Widget = ({
   const SaveState = useSelector((state: any) => state.saveState);
   const geoJsonData = useSelector((state: any) => state.geoJsonData.get(config.key));
   const mapData = useSelector((state: any) => state.geoJsonData);
+  const isLoggedIn = useSelector(selectIsUserLoggedIn);
 
   const bannerRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState({ width: 300, height: 300 });
@@ -63,13 +64,15 @@ export const Widget = ({
 
   return (
     <Rnd
-      className="widget-container"
+      className={`widget-container ${!isLoggedIn ? 'disabled-drag-handle' : ''}`}
       size={{ width: size.width, height: size.height }}
       position={{ x: position.x, y: position.y }}
       minWidth={100}
       minHeight={100}
       bounds="parent" // Keep the widget within the Dashboard
       dragHandleClassName="widget-banner"
+      disableDragging={!isLoggedIn}
+      enableResizing={isLoggedIn}
       onDragStop={(e, d) => {
         const newPosition = new Coord(d.x, d.y);
         setPosition(newPosition); // Direct drag update
@@ -106,6 +109,7 @@ export const Widget = ({
             justifyContent: "center",
             width: "100%",
             height: "100%",
+            paddingTop: "25px",
           }}
         >
           {/* Conditionally render content based on widget type */}
