@@ -5,7 +5,8 @@ import Modal from "./Modal";
 import { useDispatch } from "react-redux"; // Import useDispatch
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-import { setSaveName, setSaveState } from "../redux/actions";
+import { setSaveName, setSaveState, setUserAuth, clearUserAuth } from "../redux/actions";
+import { selectIsUserLoggedIn } from "../redux/reducers";
 
 import { supabase } from "../supabaseClient";
 
@@ -36,6 +37,7 @@ const HomePage: React.FC<HomePageProps> = ({ onSelectDashboard }) => {
   const dispatch = useDispatch();
   // Access the saveState from the Redux store
   const SaveState = useSelector((state: any) => state.saveState);
+  const isLoggedIn = useSelector(selectIsUserLoggedIn);
 
   // Remove the selected key from local storage
   const handleDeleteKey = async (keyToDelete: string) => {
@@ -72,13 +74,49 @@ const HomePage: React.FC<HomePageProps> = ({ onSelectDashboard }) => {
   }, 1000);
   };
 
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        dispatch(
+          setUserAuth({
+            email: session.user.email || "",
+            isAuthenticated: true,
+          })
+        );
+        console.log("User session restored:", session.user.email);
+      }
+    };
+
+    checkSession();
+    
+    // Also set up auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session?.user) {
+        dispatch(
+          setUserAuth({
+            email: session.user.email || "",
+            isAuthenticated: true,
+          })
+        );
+      } else if (event === "SIGNED_OUT") {
+        dispatch(clearUserAuth());
+      }
+    });
+
+    // Cleanup subscription on unmount
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [dispatch]);
+
   // Access the dashboard names from the Redux store
   useEffect(() => {
     const getAllLocalStorageKeys = () => {
       const keys = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key && !key.startsWith("sb-")) {
+        if (key && !key.startsWith("sb-") && !key.includes("token")) {
           keys.push(key);
         }
       }
@@ -94,20 +132,6 @@ const HomePage: React.FC<HomePageProps> = ({ onSelectDashboard }) => {
   const handleAnimationComplete = () => {
     console.log("All letters have animated!");
   };
-
-  // Access the dashboard keys from the Redux store
-  useEffect(() => {
-    const getAllLocalStorageKeys = () => {
-      const keys = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key) keys.push(key);
-      }
-      return keys;
-    };
-
-    setKeys(getAllLocalStorageKeys());
-  }, []);
 
   // Update the keys when data is pulled from the database
   useEffect(() => {
@@ -229,13 +253,15 @@ const HomePage: React.FC<HomePageProps> = ({ onSelectDashboard }) => {
                   >
                     {key}
                   </button>
-                  <button
-                    className="delete-button"
-                    onClick={() => handleDeleteKey(key)}
-                    title={`Delete "${key}"`}
-                  >
-                    ✕
-                  </button>
+                  {isLoggedIn && (
+                    <button
+                      className="delete-button"
+                      onClick={() => handleDeleteKey(key)}
+                      title={`Delete "${key}"`}
+                    >
+                      ✕
+                    </button>
+                  )}
                 </div>
               ))
             )}
