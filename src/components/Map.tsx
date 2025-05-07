@@ -113,11 +113,15 @@ const Map: React.FC<MapProps> = ({ data }) => {
   };
 
   return (
-    <div ref={containerRef} style={{
-      height: "calc(100% - 25px)", // Subtract banner height
-      width: "100%",
-      marginTop: "25px"
-    }} className="position-relative">
+    <div
+      ref={containerRef}
+      style={{
+        height: "calc(100% - 25px)", // Subtract banner height
+        width: "100%",
+        marginTop: "25px",
+      }}
+      className="position-relative"
+    >
       <button
         className="btn btn-light rounded shadow position-absolute top-0 end-0 m-3"
         style={{ zIndex: "1000", display: isClicked ? "none" : "block" }}
@@ -157,19 +161,25 @@ const Map: React.FC<MapProps> = ({ data }) => {
         ref={setMap}
       >
         <TileLayer
-          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='© OpenStreetMap'
+          url="https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg"
+          attribution="© OpenStreetMap"
         />
 
         {Array.from(data)
-          .filter(([fileName, _geoJsonData]) => filteredFiles.includes(fileName))
+          .filter(([fileName, _geoJsonData]) =>
+            filteredFiles.includes(fileName)
+          )
           .map(([fileName, geoJsonData]) => (
             <GeoJSON
-              key={`${fileName}-${JSON.stringify(filteredProperties[fileName])}`}
+              key={`${fileName}-${JSON.stringify(
+                filteredProperties[fileName]
+              )}`}
               data={geoJsonData}
               pointToLayer={pointToLayer}
               style={geoStyle}
-              onEachFeature={(feature, layer) => onEachFeature(feature, layer, fileName)}
+              onEachFeature={(feature, layer) =>
+                onEachFeature(feature, layer, fileName)
+              }
             />
           ))}
       </MapContainer>
