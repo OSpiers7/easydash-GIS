@@ -57,6 +57,9 @@ const HomePage: React.FC<HomePageProps> = ({ onSelectDashboard }) => {
 
   // Update the selected key in the Redux store
   const handleButtonClick = (key: string) => {
+
+    setShowLoader(true);
+  setTimeout(() => {
     if (key === "DefaultValue") {
       onSelectDashboard(key); // Make a new dashboard with default values
       dispatch(setSaveState(""));
@@ -66,6 +69,7 @@ const HomePage: React.FC<HomePageProps> = ({ onSelectDashboard }) => {
     dispatch(setSaveState("load"));
     dispatch(setSaveName(key));
     onSelectDashboard(key); // Navigate to dashboard
+  }, 1000);
   };
 
   // Access the dashboard names from the Redux store
@@ -204,17 +208,7 @@ const HomePage: React.FC<HomePageProps> = ({ onSelectDashboard }) => {
               Load a dashboard
             </h3>
 
-            <div className="input-group mb-3 ">
-              <span className="input-group-text" id="inputGroup-sizing-default">
-                Search
-              </span>
-              <input
-                type="text"
-                className="form-control"
-                aria-label="Sizing example input"
-                aria-describedby="inputGroup-sizing-default"
-              ></input>
-            </div>
+        
 
             {keys.length === 0 ? (
               <div className="alert alert-warning" role="alert">

@@ -89,7 +89,7 @@ const Tab: React.FC<TabProps> = ({ children, setPosition, onClick }) => {
           opacity: 1,
         });
       }}
-      className="relative z-10 block cursor-pointer px-3 py-1.5 text-xs uppercase text-black md:px-5 md:py-3 md:text-base"
+      className="relative z-10 block cursor-pointer px-3 py-1.5 text-xs uppercase text-black font-semibold md:px-5 md:py-3 md:text-base"
     >
       {children}
     </li>

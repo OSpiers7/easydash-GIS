@@ -125,8 +125,8 @@ const options = {
       },
     },
     tooltip: {
-      bodyColor: "black", // Tooltip text color
-      titleColor: "black", // Tooltip title color
+      bodyColor: "white", // Tooltip text color
+      titleColor: "white", // Tooltip title color
     },
   },
 };
