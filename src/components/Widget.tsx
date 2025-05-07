@@ -109,7 +109,6 @@ export const Widget = ({
             justifyContent: "center",
             width: "100%",
             height: "100%",
-            paddingTop: "25px",
           }}
         >
           {/* Conditionally render content based on widget type */}
