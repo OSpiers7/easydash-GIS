@@ -68,8 +68,6 @@ export const Widget = ({
       position={{ x: position.x, y: position.y }}
       minWidth={100}
       minHeight={100}
-      maxWidth={1000}
-      maxHeight={1000}
       bounds="parent" // Keep the widget within the Dashboard
       dragHandleClassName="widget-banner"
       onDragStop={(e, d) => {

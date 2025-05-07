@@ -2,6 +2,8 @@
 import React, { useRef, useState } from "react";
 import { motion } from "framer-motion";
 
+import { useSelector } from "react-redux";
+import { selectIsUserLoggedIn } from "../redux/reducers";
 
 import UploadGeo from "./GeoJsonUpload";
 import WMSupload from "./WMSupload";
@@ -28,6 +30,8 @@ const TopBanner: React.FC<TopBannerProps> = ({
     opacity: 0,
   });
 
+  const isLoggedIn = useSelector(selectIsUserLoggedIn);
+
   return (
     <ul
       onMouseLeave={() => {
@@ -42,16 +46,19 @@ const TopBanner: React.FC<TopBannerProps> = ({
         Home
       </Tab>
 
-      <Tab setPosition={setPosition} onClick={onAddWidget}>
-        New
-      </Tab>
-      <Tab setPosition={setPosition} onClick={onSaveDashboard}>
-        Save
-      </Tab>
-
-      <Tab setPosition={setPosition} onClick={uploadData}>
-        Upload
-      </Tab>
+      {isLoggedIn && (
+        <>
+          <Tab setPosition={setPosition} onClick={onAddWidget}>
+            New
+          </Tab>
+          <Tab setPosition={setPosition} onClick={onSaveDashboard}>
+            Save
+          </Tab>
+          <Tab setPosition={setPosition} onClick={uploadData}>
+            Upload
+          </Tab>
+        </>
+      )}
       {/*CHANGE THE ONCLICK TO OPEN LOG IN MENU*/}
       <Tab setPosition={setPosition} onClick={loginUser}>
         Log In
