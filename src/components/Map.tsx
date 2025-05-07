@@ -116,22 +116,22 @@ const Map: React.FC<MapProps> = ({ data }) => {
     <div
       ref={containerRef}
       style={{
-        height: "100%", // Subtract banner height
+        height: "100%",
         width: "100%",
       }}
       className="position-relative"
     >
       <button
-        className="btn btn-light rounded shadow position-absolute top-0 end-0 m-3"
+        className="btn btn-light rounded shadow position-absolute top-0 end-0 m-4 translate-x-[-8px]"
         style={{ zIndex: "1000", display: isClicked ? "none" : "block" }}
         onClick={() => data.size > 0 && setIsClicked(!isClicked)}
       >
         <RxLayers />
       </button>
       <div
-        className="position-absolute top-0 end-0 m-3"
+        className="position-absolute top-0 end-0 m-3 translate-x-[-15px]"
         style={{
-          zIndex: 1000,
+          zIndex: 997,
           maxHeight: "80%",
           maxWidth: "80%",
           whiteSpace: "normal",
