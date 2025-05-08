@@ -1,6 +1,8 @@
 import HomeTopBanner from "./HomeTopBanner";
 import "../Dashboard.css";
 import Modal from "./Modal";
+import TiltedCard from "./TiltedCard";
+import WidgetBanner from "../styles/WidgetBanner.css";
 
 import { useDispatch } from "react-redux"; // Import useDispatch
 import { useSelector } from "react-redux";
@@ -160,7 +162,7 @@ const HomePage: React.FC<HomePageProps> = ({ onSelectDashboard }) => {
   }, [SaveState]);
 
   return (
-    <div className="w-screen min-h-screen relative bg-[#181818] pt-0">
+    <div className="w-screen min-h-screen relative bg-[#181818] pt-0 pb-40 z-0">
       {showLoader && (
         <div className="fixed inset-0 z-[9999] bg-black bg-opacity-75 flex items-center justify-center">
           <BarLoader />
@@ -234,47 +236,68 @@ const HomePage: React.FC<HomePageProps> = ({ onSelectDashboard }) => {
           </div>
         </div>
 
-        <div className="flex justify-start items-start mt-[200px] w-full">
+        <div className="mt-[200px] w-full flex flex-col items-center">
           <div className="w-[calc(100vw-400px)] mx-auto">
-
-            <h3 className="text-center w-full text-[#D8CAB8] font-semibold text-[50px] mb-8">
+            <h3 className="text-center w-full text-[#D8CAB8] font-semibold text-[60px] mb-[75px]">
               Load a dashboard
             </h3>
-
-            <div className="grid grid-cols-2 gap-4">
-              {keys.length === 0 ? (
-                <div className="alert alert-warning" role="alert">
-                  No available dashboards
-                </div>
-              ) : (
-                keys.map((key, index) => (
-                  <div
-                    key={key}
-                    style={{
-                      position: "relative",
-                      display: "block",
-                    }}
-                  >
-                    <button
-                      className="storage-button"
-                      onClick={() => handleButtonClick(key)}
-                    >
-                      {key}
-                    </button>
-                    {isLoggedIn && (
-                      <button
-                        className="delete-button"
-                        onClick={() => handleDeleteKey(key)}
-                        title={`Delete "${key}"`}
-                      >
-                        ✕
-                      </button>
-                    )}
-                  </div>
-                ))
-              )}
-            </div>
           </div>
+          <div className="grid grid-cols-2 gap-x-[100px] gap-y-[50px]">
+            {keys.length === 0 ? (
+              <div className="alert alert-warning" role="alert">
+                No available dashboards
+              </div>
+            ) : (
+              keys.map((key, index) => (
+                <div key={key} className="relative">
+                  <div
+                    onClick={() => handleButtonClick(key)}
+                    className="cursor-pointer"
+                  >
+                    <TiltedCard
+                      imageSrc="https://i.scdn.co/image/ab67616d0000b273d9985092cd88bffd97653b58"
+                      altText="Kendrick Lamar - GNX Album Cover"
+                      captionText="Kendrick Lamar - GNX"
+                      containerHeight="335px"
+                      containerWidth="410px"
+                      imageHeight="335px"
+                      imageWidth="410px"
+                      rotateAmplitude={12}
+                      scaleOnHover={1.2}
+                      showMobileWarning={false}
+                      showTooltip={true}
+                      displayOverlayContent={true}
+                      overlayContent={
+                        <div className="flex  w-full items-start justify-between ">
+                          <span className="text-black font-semibold text-[20px] flex-1 break-words mt-2 ">
+                            {key}
+                          </span>
+
+                          {isLoggedIn && (
+                            <button
+                              className="bg-transparent text-black p-2 focus:outline-none absolute right-0"
+                              onClick={(e) => {
+                                e.stopPropagation(); // Prevent parent click
+                                handleDeleteKey(key);
+                              }}
+                              title={`Delete "${key}"`}
+                            >
+                              ✕
+                            </button>
+                          )}
+                        </div>
+                      }
+                    />
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Add Footer Section */}
+        <div className="w-full mt-auto py-2 bg-transparent text-center text-[#D8CAB8] z-10">
+          <p className="text-lg"> &copy; Salisbury University</p>
         </div>
       </div>
     </div>
