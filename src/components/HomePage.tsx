@@ -5,7 +5,12 @@ import Modal from "./Modal";
 import { useDispatch } from "react-redux"; // Import useDispatch
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-import { setSaveName, setSaveState, setUserAuth, clearUserAuth } from "../redux/actions";
+import {
+  setSaveName,
+  setSaveState,
+  setUserAuth,
+  clearUserAuth,
+} from "../redux/actions";
 import { selectIsUserLoggedIn } from "../redux/reducers";
 
 import { supabase } from "../supabaseClient";
@@ -59,24 +64,25 @@ const HomePage: React.FC<HomePageProps> = ({ onSelectDashboard }) => {
 
   // Update the selected key in the Redux store
   const handleButtonClick = (key: string) => {
-
     setShowLoader(true);
-  setTimeout(() => {
-    if (key === "DefaultValue") {
-      onSelectDashboard(key); // Make a new dashboard with default values
-      dispatch(setSaveState(""));
-      dispatch(setSaveName(""));
-      return;
-    }
-    dispatch(setSaveState("load"));
-    dispatch(setSaveName(key));
-    onSelectDashboard(key); // Navigate to dashboard
-  }, 1000);
+    setTimeout(() => {
+      if (key === "DefaultValue") {
+        onSelectDashboard(key); // Make a new dashboard with default values
+        dispatch(setSaveState(""));
+        dispatch(setSaveName(""));
+        return;
+      }
+      dispatch(setSaveState("load"));
+      dispatch(setSaveName(key));
+      onSelectDashboard(key); // Navigate to dashboard
+    }, 1000);
   };
 
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (session?.user) {
         dispatch(
           setUserAuth({
@@ -89,9 +95,11 @@ const HomePage: React.FC<HomePageProps> = ({ onSelectDashboard }) => {
     };
 
     checkSession();
-    
+
     // Also set up auth state change listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" && session?.user) {
         dispatch(
           setUserAuth({
@@ -228,43 +236,44 @@ const HomePage: React.FC<HomePageProps> = ({ onSelectDashboard }) => {
 
         <div className="flex justify-start items-start mt-[200px] w-full">
           <div className="w-[calc(100vw-400px)] mx-auto">
-            <h3 className="text-center w-full text-[#D8CAB8] font-semibold text-[50px]">
+
+            <h3 className="text-center w-full text-[#D8CAB8] font-semibold text-[50px] mb-8">
               Load a dashboard
             </h3>
 
-        
-
-            {keys.length === 0 ? (
-              <div className="alert alert-warning" role="alert">
-                No available dashboards
-              </div>
-            ) : (
-              keys.map((key, index) => (
-                <div
-                  key={key}
-                  style={{
-                    position: "relative",
-                    display: "inline-block",
-                  }}
-                >
-                  <button
-                    className="storage-button"
-                    onClick={() => handleButtonClick(key)}
-                  >
-                    {key}
-                  </button>
-                  {isLoggedIn && (
-                    <button
-                      className="delete-button"
-                      onClick={() => handleDeleteKey(key)}
-                      title={`Delete "${key}"`}
-                    >
-                      ✕
-                    </button>
-                  )}
+            <div className="grid grid-cols-2 gap-4">
+              {keys.length === 0 ? (
+                <div className="alert alert-warning" role="alert">
+                  No available dashboards
                 </div>
-              ))
-            )}
+              ) : (
+                keys.map((key, index) => (
+                  <div
+                    key={key}
+                    style={{
+                      position: "relative",
+                      display: "block",
+                    }}
+                  >
+                    <button
+                      className="storage-button"
+                      onClick={() => handleButtonClick(key)}
+                    >
+                      {key}
+                    </button>
+                    {isLoggedIn && (
+                      <button
+                        className="delete-button"
+                        onClick={() => handleDeleteKey(key)}
+                        title={`Delete "${key}"`}
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       </div>
