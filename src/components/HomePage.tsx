@@ -2,7 +2,7 @@ import HomeTopBanner from "./HomeTopBanner";
 import "../Dashboard.css";
 import Modal from "./Modal";
 import TiltedCard from "./TiltedCard";
-import WidgetBanner from "../styles/WidgetBanner.css";
+
 
 import { useDispatch } from "react-redux"; // Import useDispatch
 import { useSelector } from "react-redux";
