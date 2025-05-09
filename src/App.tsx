@@ -28,9 +28,6 @@ function App() {
 
       // Loop through each file
       for (const file of files) {
-        // Only process .json files
-        if (!file.name.endsWith('.json')) continue;
-
         // Download the file
         const { data, error: downloadError } = await supabase.storage
           .from('dashboards')
