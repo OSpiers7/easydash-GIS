@@ -5,12 +5,15 @@ import { RxLayers } from "react-icons/rx";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import MapFilter from "./MapFilter";
+import { useDispatch } from "react-redux";
+import { setRenderedMapData } from "../redux/actions"; // Import the action to set rendered map data
 
 interface MapProps {
   data: Map<string, GeoJSON.FeatureCollection>;
 }
 
 const Map: React.FC<MapProps> = ({ data }) => {
+  const dispatch = useDispatch();
   const [filteredFiles, setFilteredFiles] = useState<string[]>([]);
   const [fileProperties, setFileProperties] = useState<{ [key: string]: string[] }>({});
   const [filteredProperties, setFilteredProperties] = useState<{ [key: string]: string[] }>({});
@@ -18,28 +21,110 @@ const Map: React.FC<MapProps> = ({ data }) => {
   const [map, setMap] = useState<L.Map | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  //Used to rerender layers when user resizes the map widget
-  useEffect(() => {
-    if (!containerRef.current || !map)
-      return;
+  console.log("Map component rendered");
+  console.log("Data passed to Map component:", data);
 
+  // Function to extract rendered data
+  const extractRenderedData = () => {
+    if (!map) {
+      console.warn("Map is not initialized. Skipping rendered data extraction.");
+      return;
+    }
+
+    const bounds = map.getBounds(); // Get the currently viewable area
+    console.log("Current map bounds:", bounds);
+
+    const renderedData = Array.from(data)
+      .filter(([fileName, _geoJsonData]) => filteredFiles.includes(fileName))
+      .map(([fileName, geoJsonData]) => {
+        const filteredFeatures = geoJsonData.features.filter((feature) => {
+          if (!feature.geometry) {
+            console.warn(`Feature in file "${fileName}" has no geometry. Skipping.`);
+            return false;
+          }
+
+          const [lng, lat] = feature.geometry.type === "Point"
+            ? feature.geometry.coordinates
+            : feature.geometry.type === "Polygon" || feature.geometry.type === "MultiPolygon"
+            ? feature.geometry.coordinates[0][0]
+            : [null, null];
+
+          const isWithinBounds = lat !== null && lng !== null && bounds.contains([lat, lng] as L.LatLngTuple);
+          if (!isWithinBounds) {
+            console.log(`Feature with coordinates [${lat}, ${lng}] is outside bounds.`);
+          }
+
+          return feature.geometry.type !== "GeometryCollection" &&
+            lat !== null &&
+            lng !== null &&
+            Array.isArray(feature.geometry.coordinates) &&
+            feature.geometry.coordinates.length >= 2 &&
+            isWithinBounds;
+        });
+
+        console.log(`Filtered features for file "${fileName}":`, filteredFeatures);
+
+        return {
+          fileName,
+          geoJsonData: {
+            ...geoJsonData,
+            features: filteredFeatures,
+          },
+        };
+      });
+
+    console.log("Rendered data to be dispatched:", renderedData);
+
+    // Dispatch the rendered data to Redux
+    dispatch(setRenderedMapData(renderedData));
+  };
+
+  // Update rendered data whenever map view changes
+  useEffect(() => {
+    if (!map) {
+      console.warn("Map is not initialized. Skipping map event listeners.");
+      return;
+    }
+
+    console.log("Adding map event listeners for moveend and zoomend.");
+    map.on("moveend", extractRenderedData);
+    map.on("zoomend", extractRenderedData);
+
+    return () => {
+      console.log("Removing map event listeners for moveend and zoomend.");
+      map.off("moveend", extractRenderedData);
+      map.off("zoomend", extractRenderedData);
+    };
+  }, [map, data, filteredFiles, filteredProperties]);
+
+  // Used to rerender layers when user resizes the map widget
+  useEffect(() => {
+    if (!containerRef.current || !map) {
+      console.warn("Container or map is not initialized. Skipping resize observer.");
+      return;
+    }
+
+    console.log("Adding resize observer for map container.");
     const observer = new ResizeObserver(() => {
+      console.log("Map container resized. Invalidating map size.");
       map.invalidateSize();
     });
 
     observer.observe(containerRef.current);
 
     return () => {
+      console.log("Disconnecting resize observer for map container.");
       observer.disconnect();
     };
   }, [map]);
 
-  //Get properties associated with each new file
+  // Get properties associated with each new file
   useEffect(() => {
+    console.log("Extracting properties for each file.");
     setFileProperties(getProperties());
   }, [data]);
 
-  //Extracts unique properties from all the features in a file
+  // Extracts unique properties from all the features in a file
   const getProperties = () => {
     const propertiesByFile: { [key: string]: string[] } = {};
 
@@ -57,10 +142,11 @@ const Map: React.FC<MapProps> = ({ data }) => {
       propertiesByFile[fileName] = Array.from(propertySet);
     });
 
+    console.log("Extracted properties by file:", propertiesByFile);
     return propertiesByFile;
   };
 
-  //Stylig for point features on the map
+  // Styling for point features on the map
   const pointToLayer = (feature: any, latlng: L.LatLng) => {
     const color = feature.properties?.color || "#3388ff";
     return L.circleMarker(latlng, {
@@ -69,7 +155,7 @@ const Map: React.FC<MapProps> = ({ data }) => {
       color: color,
       fillColor: color,
       opacity: 1,
-      fillOpacity: 0.8
+      fillOpacity: 0.8,
     });
   };
 

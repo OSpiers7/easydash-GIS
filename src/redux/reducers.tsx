@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux';
-import { SET_GEOJSON_DATA, SET_GEOJSON_SELECTED_KEY, SET_SAVE_NAME, SET_SAVE_STATE, SET_USER_AUTH, CLEAR_USER_AUTH } from './actions';
+import { SET_GEOJSON_DATA, SET_GEOJSON_SELECTED_KEY, SET_SAVE_NAME, SET_SAVE_STATE, SET_USER_AUTH, CLEAR_USER_AUTH, SET_RENDERED_MAP_DATA } from './actions';
 import { FeatureCollection, Geometry, GeoJsonProperties } from 'geojson';
 import { geoJson } from 'leaflet';
 
@@ -81,11 +81,28 @@ const userAuthReducer = (
   }
 };
 
+// Initial state for rendered map data
+const initialRenderedMapData: any = null;
+
+const renderedMapDataReducer = (
+  state = initialRenderedMapData,
+  action: { type: string; payload: any }
+) => {
+  switch (action.type) {
+    case SET_RENDERED_MAP_DATA:
+      return action.payload;
+    default:
+      return state;
+  }
+}
+
+// Combine all reducers into a single root reducer
 const rootReducer = combineReducers({
   geoJsonData: geoJsonReducer, 
   geoJsonDataKey: geoJsonKeyReducer,
   saveState: saveStateReducer,
   userAuth: userAuthReducer,
+  renderedMapData: renderedMapDataReducer,
 });
 
 export default rootReducer;
@@ -95,3 +112,6 @@ export const selectIsUserLoggedIn = (state: any): boolean => state.userAuth.isAu
 
 // Selector for getting the user's email
 export const selectUserEmail = (state: any): string => state.userAuth.email;
+
+// selector for getting rendered map data
+export const selectRenderedMapData = (state: any): any => state.renderedMapData;

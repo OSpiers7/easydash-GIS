@@ -17,7 +17,6 @@ import { selectIsUserLoggedIn } from "../redux/reducers";
 export interface WidgetProps {
   id: string;
   onRemove: (id: string) => void;
-// geoJsonData: any;
   type: string; // Add type prop
   config: any; // Add config prop
   onUpdatePositionSize: (id: string, position: { x: number; y: number }, size: { width: number; height: number }) => void; // Add prop to give size and position to dashboard
@@ -25,23 +24,26 @@ export interface WidgetProps {
 
 export const Widget = ({
   id,
-  onRemove//geoJsonData,
-,//geoJsonData,
-
-//geoJsonData,
-  type, // Destructure type prop
-  config, // Destructure config prop
+  onRemove,
+  type,
+  config,
   onUpdatePositionSize,
 }: WidgetProps) => {
   const ReduxKey = useSelector((state: any) => state.geoJsonDataKey);
   const SaveState = useSelector((state: any) => state.saveState);
   const geoJsonData = useSelector((state: any) => state.geoJsonData.get(config.key));
   const mapData = useSelector((state: any) => state.geoJsonData);
+  const renderedMapData = useSelector((state: any) => state.renderedMapData); // Access rendered map data
   const isLoggedIn = useSelector(selectIsUserLoggedIn);
 
   const bannerRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState({ width: 300, height: 300 });
   const [position, setPosition] = useState({ x: 200, y: 200 }); // Updated initial position
+  const [dataSource, setDataSource] = useState<"geoJsonData" | "renderedMapData">(
+    "geoJsonData"
+  ); // State for data source selection
+
+  const data = dataSource === "geoJsonData" ? geoJsonData : renderedMapData[0].geoJsonData; // Determine data source
 
   useEffect(() => {
     if (SaveState[0] === "load") {
@@ -64,7 +66,7 @@ export const Widget = ({
 
   return (
     <Rnd
-      className={`widget-container ${!isLoggedIn ? 'disabled-drag-handle' : ''}`}
+      className={`widget-container ${!isLoggedIn ? "disabled-drag-handle" : ""}`}
       size={{ width: size.width, height: size.height }}
       position={{ x: position.x, y: position.y }}
       minWidth={100}
@@ -99,7 +101,12 @@ export const Widget = ({
         }}
       >
         {/* Drag and close button inside the banner */}
-        <WidgetBanner id={id} onRemove={onRemove} ref={bannerRef} />
+        <WidgetBanner
+          id={id}
+          onRemove={onRemove}
+          ref={bannerRef}
+          onDataSourceChange={setDataSource} // Pass callback to handle data source change
+        />
 
         <div
           style={{
@@ -114,7 +121,7 @@ export const Widget = ({
           {/* Conditionally render content based on widget type */}
           {type === "bar" && (
             <GeoJSONChart
-              data={geoJsonData}
+              data={data} // Use selected data source
               xAttr={config.xAttr}
               yAttr={config.yAttr} // Pass yAttr
               filters={config.filters}
@@ -124,7 +131,7 @@ export const Widget = ({
           )}
           {type === "pie" && (
             <PieChart
-              data={geoJsonData}
+              data={data} // Use selected data source
               xAttr={config.xAttr}
               yAttr={config.yAttr} // Pass yAttr
               filters={config.filters}
@@ -139,7 +146,7 @@ export const Widget = ({
               geoJsonKey={config.key}
             />
           )}
-          {type === "map" && <Map data={mapData} />}
+          {type === "map" && <Map data={mapData} />} {/* Use selected data source */}
         </div>
       </div>
     </Rnd>
