@@ -170,14 +170,33 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
       console.error("Dashboard element not found");
       return null;
     }
+
+    // Find the foreground content to temporarily hide it
+    const foregroundContent = document.querySelector(".relative.z-10") as HTMLElement;
+    let originalDisplay = "block";
+
+    // Store original display style and hide it
+    if (foregroundContent) {
+      originalDisplay = foregroundContent.style.display;
+      foregroundContent.style.display = "none";
+    }
+
     const canvas = await html2canvas(element, {
-      scale: 0.3,
-      backgroundColor: null,
+      scale: 1,
+      backgroundColor: "#525252",
+      useCORS: true,
+      allowTaint: true
     });
+
+    // Restore the original display style
+    if (foregroundContent) {
+      foregroundContent.style.display = originalDisplay;
+    }
+
     const blob = await new Promise<Blob | null>((resolve) => {
       canvas.toBlob((blob: Blob | null) => {
         resolve(blob);
-      }, "image/png");
+      }, "image/png", 0.9);
     });
     return blob;
   };
@@ -201,12 +220,12 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
 
       // Capture and upload screenshot
       const screenshotBlob = await captureDashboardScreenshot(
-        "dashboard-container"
+        "full-dashboard"
       ); // your dashboard div id
       if (!screenshotBlob) return;
 
       const { error: imageError } = await supabase.storage
-        .from("dashboards")
+        .from("screenshots")
         .upload(`${dashboardName}.png`, screenshotBlob, {
           contentType: "image/png",
           upsert: true,
@@ -227,9 +246,8 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
   }, [SaveState]);
 
   return (
-    <div className="dashboard">
+    <div id="full-dashboard" className="dashboard">
       {/* BACKGROUND LAYER */}
-
       <div className="fixed inset-0 z-0 h-full w-full bg-[url('/world.svg')] bg-cover bg-center">
         {/* The SVG file will act as the background */}
       </div>
@@ -340,7 +358,7 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
             type={widget.type}
             config={widget.config}
             onUpdatePositionSize={updateWidgetPositionSize}
-            //geoJsonData = {setGeoJsonData}
+          //geoJsonData = {setGeoJsonData}
           />
         ))}
       </div>

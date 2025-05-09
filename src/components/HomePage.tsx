@@ -38,6 +38,10 @@ interface HomePageProps {
   onSelectDashboard: (key: string) => void;
 }
 
+interface ScreenshotMap {
+  [key: string]: string; // Maps dashboard name to base64 image data
+}
+
 const HomePage: React.FC<HomePageProps> = ({ onSelectDashboard }) => {
   //the icon for the add item button
 
@@ -45,6 +49,72 @@ const HomePage: React.FC<HomePageProps> = ({ onSelectDashboard }) => {
   // Access the saveState from the Redux store
   const SaveState = useSelector((state: any) => state.saveState);
   const isLoggedIn = useSelector(selectIsUserLoggedIn);
+
+  const [screenshotUrls, setScreenshotUrls] = useState<ScreenshotMap>({});
+
+  // Fetch screenshots from Supabase
+  const fetchScreenshots = async () => {
+    try {
+      setShowLoader(true); // Show loader while fetching
+      
+      // List all files in the "screenshots" bucket
+      const { data: files, error: listError } = await supabase.storage
+        .from('screenshots')
+        .list();
+
+      if (listError) {
+        console.error("Error listing screenshots:", listError);
+        setShowLoader(false);
+        return;
+      }
+      
+      if (!files) {
+        setShowLoader(false);
+        return;
+      }
+
+      // Create a map of dashboard names to their base64 image data
+      const imageMap: ScreenshotMap = {};
+      
+      for (const file of files) {
+        if (!file.name.endsWith('.png')) continue;
+        
+        // Get the dashboard name (remove .png extension)
+        const dashboardName = file.name.replace(/\.png$/, '');
+        
+        // Download the actual file data
+        const { data, error: downloadError } = await supabase.storage
+          .from('screenshots')
+          .download(file.name);
+          
+        if (downloadError) {
+          console.error(`Error downloading ${file.name}:`, downloadError);
+          continue;
+        }
+        
+        if (data) {
+          // Convert blob to base64
+          const reader = new FileReader();
+          reader.readAsDataURL(data);
+          await new Promise<void>((resolve) => {
+            reader.onloadend = () => {
+              if (typeof reader.result === 'string') {
+                imageMap[dashboardName] = reader.result;
+              }
+              resolve();
+            };
+          });
+        }
+      }
+      
+      setScreenshotUrls(imageMap);
+      console.log("Loaded screenshot data for", Object.keys(imageMap).length, "dashboards");
+      setShowLoader(false);
+    } catch (error) {
+      console.error('Error fetching screenshots:', error);
+      setShowLoader(false);
+    }
+  };
 
   // Remove the selected key from local storage
   const handleDeleteKey = async (keyToDelete: string) => {
@@ -134,6 +204,7 @@ const HomePage: React.FC<HomePageProps> = ({ onSelectDashboard }) => {
     };
 
     setKeys(getAllLocalStorageKeys());
+    fetchScreenshots();
   }, []);
 
   const [keys, setKeys] = useState<string[]>([]);
@@ -255,9 +326,9 @@ const HomePage: React.FC<HomePageProps> = ({ onSelectDashboard }) => {
                     className="cursor-pointer"
                   >
                     <TiltedCard
-                      imageSrc="https://i.scdn.co/image/ab67616d0000b273d9985092cd88bffd97653b58"
-                      altText="Kendrick Lamar - GNX Album Cover"
-                      captionText="Kendrick Lamar - GNX"
+                      imageSrc={screenshotUrls[key] || "https://i.scdn.co/image/ab67616d0000b273d9985092cd88bffd97653b58"}
+                      altText=""
+                      captionText=""
                       containerHeight="335px"
                       containerWidth="410px"
                       imageHeight="335px"

@@ -1,4 +1,4 @@
-import React, { forwardRef } from "react";
+import React, { forwardRef, useState } from "react";
 import "../styles/WidgetBanner.css"; // Ensure it picks up any necessary styles
 import { useSelector } from "react-redux";
 import { selectIsUserLoggedIn } from "../redux/reducers";
@@ -6,21 +6,52 @@ import { selectIsUserLoggedIn } from "../redux/reducers";
 interface WidgetBannerProps {
   id: string;
   onRemove: (id: string) => void;
+  onDataSourceChange: (dataSource: "geoJsonData" | "renderedMapData") => void; // Callback for data source change
 }
 
 const WidgetBanner = forwardRef<HTMLDivElement, WidgetBannerProps>(
-  ({ id, onRemove }, ref) => {
-    // Check if user is logged in
+  ({ id, onRemove, onDataSourceChange }, ref) => {
     const isLoggedIn = useSelector(selectIsUserLoggedIn);
+    const [menuOpen, setMenuOpen] = useState(false); // State for burger menu
+
+    const handleDataSourceChange = (dataSource: "geoJsonData" | "renderedMapData") => {
+      onDataSourceChange(dataSource); // Notify parent component
+      setMenuOpen(false); // Close the menu
+    };
+
     return (
       <div className="widget-banner" ref={ref}>
         <div className="widget-banner-drag-handle">
           {/* Dragging happens from here */}
         </div>
         {isLoggedIn && (
-          <button className="remove-button" onClick={() => onRemove(id)}>
-            ×
-          </button>
+          <>
+            <button className="remove-button" onClick={() => onRemove(id)}>
+              ×
+            </button>
+            <button
+              className="burger-menu-button"
+              onClick={() => setMenuOpen((prev) => !prev)}
+            >
+              ☰
+            </button>
+            {menuOpen && (
+              <div className="burger-menu">
+                <button
+                  className="menu-item"
+                  onClick={() => handleDataSourceChange("geoJsonData")}
+                >
+                  Use Entire Dataset
+                </button>
+                <button
+                  className="menu-item"
+                  onClick={() => handleDataSourceChange("renderedMapData")}
+                >
+                  Use Rendered Map Data
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     );

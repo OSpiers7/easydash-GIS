@@ -49,3 +49,11 @@ export const setUserAuth = (userData: UserAuth) => ({
 export const clearUserAuth = () => ({
   type: CLEAR_USER_AUTH,
 });
+
+//action to store the rendered map data in redux store
+export const SET_RENDERED_MAP_DATA = 'SET_RENDERED_MAP_DATA';
+
+export const setRenderedMapData = (renderedData: any) => ({
+  type: SET_RENDERED_MAP_DATA,
+  payload: renderedData
+})
