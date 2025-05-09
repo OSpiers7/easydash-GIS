@@ -146,7 +146,7 @@ const Map: React.FC<MapProps> = ({ data }) => {
     return propertiesByFile;
   };
 
-  // Styling for point features on the map
+  //Styling for point features on the map
   const pointToLayer = (feature: any, latlng: L.LatLng) => {
     const color = feature.properties?.color || "#3388ff";
     return L.circleMarker(latlng, {
@@ -226,7 +226,6 @@ const Map: React.FC<MapProps> = ({ data }) => {
           overflowY: "auto",
           display: isClicked ? "block" : "none",
         }}
-        onMouseEnter={() => setIsClicked(true)}
         onMouseLeave={() => setIsClicked(false)}
       >
         <MapFilter
@@ -234,6 +233,7 @@ const Map: React.FC<MapProps> = ({ data }) => {
           fileNames={Array.from(data.keys())}
           onFileFilterSelect={handleFileFilterSelect}
           onPropertiesFilterSelect={handlePropertyFilterSelect}
+          isVisible={isClicked}
         />
       </div>
 
