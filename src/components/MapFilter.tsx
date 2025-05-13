@@ -53,11 +53,7 @@ const MapFilter: React.FC<MapFilterProps> = ({
     }
   }, [isVisible, fileNames]); // Run whenever isVisible changes
 
-  const includeFile = (fileName: string) => {
-    if (!checkedFiles.includes(fileName)) {
-      setCheckedFiles((prev) => [...prev, fileName]);
-    }
-  }
+  
 
   const handleFileCheckboxChange = (fileName: string, ) => {
     setCheckedFiles((prev) => {
