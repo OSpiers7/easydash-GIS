@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface MapFilterProps {
   fileNames: string[];
   fileProperties: { [key: string]: string[] };
   onFileFilterSelect: (filteredFiles: string[]) => void;
   onPropertiesFilterSelect: (checkedProperties: { [fileName: string]: string[] }) => void;
+  isVisible: boolean; // New prop to track visibility
 }
 
 const MapFilter: React.FC<MapFilterProps> = ({
@@ -12,20 +13,45 @@ const MapFilter: React.FC<MapFilterProps> = ({
   fileProperties,
   onFileFilterSelect,
   onPropertiesFilterSelect,
+  isVisible,
 }) => {
   const [checkedFiles, setCheckedFiles] = useState<string[]>([]);
   const [checkedProperties, setCheckedProperties] = useState<{ [fileName: string]: string[] }>({});
   const [collapsedFiles, setCollapsedFiles] = useState<{ [fileName: string]: boolean }>({});
 
-  // Update file filters after checkedFiles changes
   useEffect(() => {
     onFileFilterSelect(checkedFiles);
   }, [checkedFiles, onFileFilterSelect]);
 
-  // Update properties filter after checkedProperties changes
   useEffect(() => {
     onPropertiesFilterSelect(checkedProperties);
   }, [checkedProperties, onPropertiesFilterSelect]);
+
+  // Reset collapse state when visibility changes
+  useEffect(() => {
+    if (!isVisible) {
+      setCollapsedFiles((prev) => {
+        const resetState: { [fileName: string]: boolean } = {};
+        fileNames.forEach((fileName) => {
+          resetState[fileName] = false; // Force collapse (set to "+")
+        });
+        return resetState;
+      });
+    }
+  }, [isVisible, fileNames]); // Run whenever isVisible changes
+
+  // Reset collapse state when visibility changes
+  useEffect(() => {
+    if (!isVisible) {
+      setCollapsedFiles((prev) => {
+        const resetState: { [fileName: string]: boolean } = {};
+        fileNames.forEach((fileName) => {
+          resetState[fileName] = false; // Force collapse (set to "+")
+        });
+        return resetState;
+      });
+    }
+  }, [isVisible, fileNames]); // Run whenever isVisible changes
 
   const includeFile = (fileName: string) => {
     if (!checkedFiles.includes(fileName)) {
@@ -44,22 +70,16 @@ const MapFilter: React.FC<MapFilterProps> = ({
 
   const handlePropertyCheckboxChange = (fileName: string, property: string) => {
     setCheckedProperties((prevCheckedProperties) => {
-      const updatedFileProperties = prevCheckedProperties[fileName] || []; // Ensure it's an array
+      const updatedFileProperties = prevCheckedProperties[fileName] || [];
 
-      let newCheckedProperties;
+      const newCheckedProperties = updatedFileProperties.includes(property)
+        ? updatedFileProperties.filter((p) => p !== property)
+        : [...updatedFileProperties, property];
 
-      if (updatedFileProperties.includes(property)) {
-        newCheckedProperties = updatedFileProperties.filter((p) => p !== property);
-      } else {
-        newCheckedProperties = [...updatedFileProperties, property];
-      }
-
-      const updatedProperties = {
+      return {
         ...prevCheckedProperties,
         [fileName]: newCheckedProperties,
       };
-
-      return updatedProperties;
     });
   };
 
@@ -72,55 +92,73 @@ const MapFilter: React.FC<MapFilterProps> = ({
 
   return (
     <ul className="list-group">
-      {fileNames.map((fileName) => (
-        <li key={fileName} className="list-group-item">
-          <div className="d-flex justify-content-between align-items-center">
-            <div>
-              <input
-                className="form-check-input me-2"
-                type="checkbox"
-                value={fileName}
-                id={`checkbox-${fileName}`}
-                checked={checkedFiles.includes(fileName)}
-                onChange={() => handleFileCheckboxChange(fileName)}
-              />
-              <label className="form-check-label me-3" htmlFor={`checkbox-${fileName}`}>
-                {fileName}
-              </label>
+      {fileNames.map((fileName) => {
+        const contentRef = useRef<HTMLDivElement>(null);
+        const isOpen = collapsedFiles[fileName];
+
+        return (
+          <li key={fileName} className="list-group-item">
+            <div className="d-flex justify-content-between align-items-center">
+              <div>
+                <input
+                  className="form-check-input me-2"
+                  type="checkbox"
+                  value={fileName}
+                  id={`checkbox-${fileName}`}
+                  checked={checkedFiles.includes(fileName)}
+                  onChange={() => handleFileCheckboxChange(fileName)}
+                />
+                <label className="form-check-label me-3" htmlFor={`checkbox-${fileName}`}>
+                  {fileName}
+                </label>
+              </div>
+              {checkedFiles.includes(fileName) && (
+                <button
+                  className="btn btn-sm btn-outline-primary"
+                  type="button"
+                  onClick={() => toggleCollapse(fileName)}
+                >
+                  {isOpen ? "-" : "+"}
+                </button>
+              )}
             </div>
             {checkedFiles.includes(fileName) && (
-              <button
-                className="btn btn-sm btn-outline-primary"
-                type="button"
-                onClick={() => toggleCollapse(fileName)} // Trigger the collapse toggle
+              <div
+                ref={contentRef}
+                style={{
+                  overflow: "hidden",
+                  transition: "max-height 0.3s ease",
+                  maxHeight: isOpen
+                    ? contentRef.current?.scrollHeight + "px"
+                    : "0px",
+                }}
+                className="mt-2"
               >
-                {collapsedFiles[fileName] ? "-" : "+"}
-              </button>
+                <ul className="list-group">
+                  {fileProperties[fileName].map((property) => (
+                    <li key={`${fileName}-${property}`}>
+                      <input
+                        className="form-check-input me-2"
+                        type="checkbox"
+                        value={`${fileName}-${property}`}
+                        id={`checkbox-${fileName}-${property}`}
+                        checked={checkedProperties[fileName]?.includes(property) || false}
+                        onChange={() => handlePropertyCheckboxChange(fileName, property)}
+                      />
+                      <label
+                        className="form-check-label me-3"
+                        htmlFor={`checkbox-${fileName}-${property}`}
+                      >
+                        {property}
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
-          </div>
-          {checkedFiles.includes(fileName) && (
-            <div className={`mt-2 ${collapsedFiles[fileName] ? "collapse show" : "collapse"}`}>
-              <ul className="list-group">
-                {fileProperties[fileName].map((property) => (
-                  <div key={`${fileName}-${property}`}>
-                    <input
-                      className="form-check-input me-2"
-                      type="checkbox"
-                      value={`${fileName}-${property}`}
-                      id={`checkbox-${fileName}-${property}`}
-                      checked={checkedProperties[fileName]?.includes(property) || false} // Ensure false if undefined
-                      onChange={() => handlePropertyCheckboxChange(fileName, property)}
-                    />
-                    <label className="form-check-label me-3" htmlFor={`checkbox-${fileName}-${property}`}>
-                      {property}
-                    </label>
-                  </div>
-                ))}
-              </ul>
-            </div>
-          )}
-        </li>
-      ))}
+          </li>
+        );
+      })}
     </ul>
   );
 };
