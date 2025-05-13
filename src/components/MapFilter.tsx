@@ -27,7 +27,13 @@ const MapFilter: React.FC<MapFilterProps> = ({
     onPropertiesFilterSelect(checkedProperties);
   }, [checkedProperties, onPropertiesFilterSelect]);
 
-  const handleFileCheckboxChange = (fileName: string) => {
+  const includeFile = (fileName: string) => {
+    if (!checkedFiles.includes(fileName)) {
+      setCheckedFiles((prev) => [...prev, fileName]);
+    }
+  }
+
+  const handleFileCheckboxChange = (fileName: string, ) => {
     setCheckedFiles((prev) => {
       const updated = prev.includes(fileName)
         ? prev.filter((f) => f !== fileName)

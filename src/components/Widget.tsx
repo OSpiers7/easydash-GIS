@@ -43,7 +43,12 @@ export const Widget = ({
     "geoJsonData"
   ); // State for data source selection
 
-  const data = dataSource === "geoJsonData" ? geoJsonData : renderedMapData[0].geoJsonData; // Determine data source
+  console.log("renderedMapData", renderedMapData);
+  console.log("renderedMapData[0]", renderedMapData[0]);
+  const data = dataSource === "geoJsonData" ? geoJsonData : renderedMapData[0] ? renderedMapData[0].geoJsonData : (() => {
+    alert("Must have data rendered to link widget to map");
+    return geoJsonData;
+  })(); // Use selected data source
 
   useEffect(() => {
     if (SaveState[0] === "load") {
@@ -106,6 +111,7 @@ export const Widget = ({
           onRemove={onRemove}
           ref={bannerRef}
           onDataSourceChange={setDataSource} // Pass callback to handle data source change
+          widgetType={type} // Pass widget type
         />
 
         <div

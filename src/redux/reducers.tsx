@@ -82,7 +82,7 @@ const userAuthReducer = (
 };
 
 // Initial state for rendered map data
-const initialRenderedMapData: any = null;
+const initialRenderedMapData: Map<string, FeatureCollection<Geometry, GeoJsonProperties>> = new Map();
 
 const renderedMapDataReducer = (
   state = initialRenderedMapData,

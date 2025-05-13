@@ -7,6 +7,7 @@ import "leaflet/dist/leaflet.css";
 import MapFilter from "./MapFilter";
 import { useDispatch } from "react-redux";
 import { setRenderedMapData } from "../redux/actions"; // Import the action to set rendered map data
+import { filter } from "lodash";
 
 interface MapProps {
   data: Map<string, GeoJSON.FeatureCollection>;
@@ -81,7 +82,7 @@ const Map: React.FC<MapProps> = ({ data }) => {
 
   // Update rendered data whenever map view changes
   useEffect(() => {
-    if (!map) {
+    if (!map || filteredFiles.length === 0) {
       console.warn("Map is not initialized. Skipping map event listeners.");
       return;
     }

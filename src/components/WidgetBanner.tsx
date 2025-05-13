@@ -7,10 +7,11 @@ interface WidgetBannerProps {
   id: string;
   onRemove: (id: string) => void;
   onDataSourceChange: (dataSource: "geoJsonData" | "renderedMapData") => void; // Callback for data source change
+  widgetType: string;
 }
 
 const WidgetBanner = forwardRef<HTMLDivElement, WidgetBannerProps>(
-  ({ id, onRemove, onDataSourceChange }, ref) => {
+  ({ id, onRemove, onDataSourceChange, widgetType }, ref) => {
     const isLoggedIn = useSelector(selectIsUserLoggedIn);
     const [menuOpen, setMenuOpen] = useState(false); // State for burger menu
 
@@ -29,27 +30,31 @@ const WidgetBanner = forwardRef<HTMLDivElement, WidgetBannerProps>(
             <button className="remove-button" onClick={() => onRemove(id)}>
               ×
             </button>
-            <button
-              className="burger-menu-button"
-              onClick={() => setMenuOpen((prev) => !prev)}
-            >
-              ☰
-            </button>
-            {menuOpen && (
-              <div className="burger-menu">
+            {(widgetType === "bar" || widgetType === "pie" || widgetType === "table") && (
+              <>
                 <button
-                  className="menu-item"
-                  onClick={() => handleDataSourceChange("geoJsonData")}
+                  className="burger-menu-button"
+                  onClick={() => setMenuOpen((prev) => !prev)}
                 >
-                  Use Entire Dataset
+                  ☰
                 </button>
-                <button
-                  className="menu-item"
-                  onClick={() => handleDataSourceChange("renderedMapData")}
-                >
-                  Use Rendered Map Data
-                </button>
-              </div>
+                {menuOpen && (
+                  <div className="burger-menu">
+                    <button
+                      className="menu-item"
+                      onClick={() => handleDataSourceChange("geoJsonData")}
+                    >
+                      Use Entire Dataset
+                    </button>
+                    <button
+                      className="menu-item"
+                      onClick={() => handleDataSourceChange("renderedMapData")}
+                    >
+                      Use Rendered Map Data
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </>
         )}
