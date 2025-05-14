@@ -12,7 +12,8 @@ const geoJsonReducer = (
 ) => {
   switch (action.type) {
     case SET_GEOJSON_DATA:
-      return new Map([...state, ...action.payload]); // Merge existing state with new data
+      return new Map(action.payload); // Completely replace the Map with the new data
+      //return new Map([...state, ...action.payload]); // Merge existing state with new data
     default:
       return state;
   }

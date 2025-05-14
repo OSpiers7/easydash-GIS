@@ -16,9 +16,11 @@ import { supabase } from '../supabaseClient';
 import html2canvas from 'html2canvas';
 
 
-import Squares from "./Squares";
+//import Squares from "./Squares";
 import WMSupload from "./WMSupload";
 import Menu from "./Menu"
+
+import DataRemove from "./DataRemove";
 
 import { useDispatch } from "react-redux"; // Import useDispatch
 import { useSelector } from "react-redux";
@@ -57,6 +59,7 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
   );
 
   const [isUploadDataOpen, setUploadDataModalOpen] = useState(false);
+  const [isRemoveDataModalOpen, setRemoveDataModalOpen] = useState(false);
   const [isUserLoginModalOpen, setUserLoginModalOpen] = useState(false);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -269,6 +272,9 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
               // Change saveState to "saving"
               setUploadDataModalOpen(true);
             }}
+            onRemoveData={() => {
+              setRemoveDataModalOpen(true);
+            }}
             loginUser={() => {
               setIsDropDownOpen(true);
             }}
@@ -338,7 +344,13 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
           <UploadGeo />
           <WMSupload />
         </Modal>
-
+        <Modal
+          isOpen={isRemoveDataModalOpen}
+          onClose={() => setRemoveDataModalOpen(false)}
+          title="Select Data Set"
+        >
+          <DataRemove />
+        </Modal>
         <Menu
           isDropDownOpen={isDropDownOpen}
           setIsDropDownOpen={setIsDropDownOpen}
