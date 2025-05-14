@@ -273,7 +273,7 @@ const HomePage: React.FC<HomePageProps> = ({ onSelectDashboard }) => {
             />
 
             <SplitText
-              text="Easy-Dash"
+              text="EasyDash-GIS"
               className="text-[200px] font-semibold text-center mb-[-10px] text-[#D8CAB8] text-shadow-md"
               delay={150}
               animationFrom={{
