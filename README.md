@@ -1,8 +1,8 @@
 USER GUIDE:
 
   1) Home Screen
-      A) Create Dashboard - Opens a new dashboard. To start creating widgets Login via nav bar, then upload GeoJSON datasets
-      B) Load a Dashboard - click one of the existing dashboards to open dashboard view
+     A) Create Dashboard - Opens a new dashboard. To start creating widgets Login via nav bar, then upload GeoJSON datasets
+     B) Load a Dashboard - click one of the existing dashboards to open dashboard view
      
   2) Dashboard Screen
       A) Login -> Upload geoJSON data to begin creating widgets
