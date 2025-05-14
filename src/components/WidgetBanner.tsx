@@ -7,10 +7,11 @@ interface WidgetBannerProps {
   id: string;
   onRemove: (id: string) => void;
   onDataSourceChange: (dataSource: "geoJsonData" | "renderedMapData") => void; // Callback for data source change
+  widgetType: string;
 }
 
 const WidgetBanner = forwardRef<HTMLDivElement, WidgetBannerProps>(
-  ({ id, onRemove, onDataSourceChange }, ref) => {
+  ({ id, onRemove, onDataSourceChange, widgetType }, ref) => {
     const isLoggedIn = useSelector(selectIsUserLoggedIn);
     const [menuOpen, setMenuOpen] = useState(false); // State for burger menu
 
@@ -19,45 +20,52 @@ const WidgetBanner = forwardRef<HTMLDivElement, WidgetBannerProps>(
       setMenuOpen(false); // Close the menu
     };
 
-    return (
-      <div className="widget-banner" ref={ref}>
-        <div className="widget-banner-drag-handle">
-          {/* Dragging happens from here */}
-        </div>
-        {isLoggedIn && (
-          <>
-            <div className="flex justify-between items-center w-full">
-              <button className="remove-button" onClick={() => onRemove(id)}>
-                ×
-              </button>
-              <button
-                className="burger-menu-button bg-transparent shadow-md relative inline-block border-black h-[30px] text-black"
-                onClick={() => setMenuOpen((prev) => !prev)}
-              >
-                <span className="transform -translate-y-[2px]">☰</span>
-              </button>
-            </div>
+return (
+  <div className="widget-banner" ref={ref}>
+    <div className="widget-banner-drag-handle">
+      {/* Dragging happens from here */}
+    </div>
 
-            {menuOpen && (
-              <div className="burger-menu absolute top-full left-0 ">
-                <button
-                  className="menu-item"
-                  onClick={() => handleDataSourceChange("geoJsonData")}
-                >
-                  Use Entire Dataset
-                </button>
-                <button
-                  className="menu-item"
-                  onClick={() => handleDataSourceChange("renderedMapData")}
-                >
-                  Use Rendered Map Data
-                </button>
-              </div>
-            )}
-          </>
+    {isLoggedIn && (
+      <>
+        <div className="flex justify-between items-center w-full">
+          <button className="remove-button" onClick={() => onRemove(id)}>
+            ×
+          </button>
+
+          {(widgetType === "bar" ||
+            widgetType === "pie" ||
+            widgetType === "table") && (
+            <button
+              className="burger-menu-button bg-transparent shadow-md relative inline-block border-black h-[30px] text-black"
+              onClick={() => setMenuOpen((prev) => !prev)}
+            >
+              <span className="transform -translate-y-[2px]">☰</span>
+            </button>
+          )}
+        </div>
+
+        {menuOpen && (
+          <div className="burger-menu absolute top-full left-0">
+            <button
+              className="menu-item"
+              onClick={() => handleDataSourceChange("geoJsonData")}
+            >
+              Use Entire Dataset
+            </button>
+            <button
+              className="menu-item"
+              onClick={() => handleDataSourceChange("renderedMapData")}
+            >
+              Use Rendered Map Data
+            </button>
+          </div>
         )}
-      </div>
-    );
+      </>
+    )}
+  </div>
+);
+
   }
 );
 

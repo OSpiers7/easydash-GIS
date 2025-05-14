@@ -7,6 +7,7 @@ import "leaflet/dist/leaflet.css";
 import MapFilter from "./MapFilter";
 import { useDispatch } from "react-redux";
 import { setRenderedMapData } from "../redux/actions"; // Import the action to set rendered map data
+import { filter } from "lodash";
 
 interface MapProps {
   data: Map<string, GeoJSON.FeatureCollection>;
@@ -81,7 +82,7 @@ const Map: React.FC<MapProps> = ({ data }) => {
 
   // Update rendered data whenever map view changes
   useEffect(() => {
-    if (!map) {
+    if (!map || filteredFiles.length === 0) {
       console.warn("Map is not initialized. Skipping map event listeners.");
       return;
     }
@@ -146,7 +147,7 @@ const Map: React.FC<MapProps> = ({ data }) => {
     return propertiesByFile;
   };
 
-  // Styling for point features on the map
+  //Styling for point features on the map
   const pointToLayer = (feature: any, latlng: L.LatLng) => {
     const color = feature.properties?.color || "#3388ff";
     return L.circleMarker(latlng, {
@@ -226,7 +227,6 @@ const Map: React.FC<MapProps> = ({ data }) => {
           overflowY: "auto",
           display: isClicked ? "block" : "none",
         }}
-        onMouseEnter={() => setIsClicked(true)}
         onMouseLeave={() => setIsClicked(false)}
       >
         <MapFilter
@@ -234,6 +234,7 @@ const Map: React.FC<MapProps> = ({ data }) => {
           fileNames={Array.from(data.keys())}
           onFileFilterSelect={handleFileFilterSelect}
           onPropertiesFilterSelect={handlePropertyFilterSelect}
+          isVisible={isClicked}
         />
       </div>
 
