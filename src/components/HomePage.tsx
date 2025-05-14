@@ -362,7 +362,7 @@ const HomePage: React.FC<HomePageProps> = ({ onSelectDashboard }) => {
 
                           {isLoggedIn && (
                             <button
-                              className="bg-transparent text-black p-2 focus:outline-none absolute right-0"
+                              className="bg-transparent text-[#D8CAB8] p-2 focus:outline-none absolute right-0"
                               onClick={(e) => {
                                 e.stopPropagation(); // Prevent parent click
                                 handleDeleteKey(key);
