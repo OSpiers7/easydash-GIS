@@ -26,17 +26,20 @@ const WidgetBanner = forwardRef<HTMLDivElement, WidgetBannerProps>(
         </div>
         {isLoggedIn && (
           <>
-            <button className="remove-button" onClick={() => onRemove(id)}>
-              ×
-            </button>
-            <button
-              className="burger-menu-button"
-              onClick={() => setMenuOpen((prev) => !prev)}
-            >
-              ☰
-            </button>
+            <div className="flex justify-between items-center w-full">
+              <button className="remove-button" onClick={() => onRemove(id)}>
+                ×
+              </button>
+              <button
+                className="burger-menu-button bg-transparent shadow-md relative inline-block border-black h-[30px] text-black"
+                onClick={() => setMenuOpen((prev) => !prev)}
+              >
+                <span className="transform -translate-y-[2px]">☰</span>
+              </button>
+            </div>
+
             {menuOpen && (
-              <div className="burger-menu">
+              <div className="burger-menu absolute top-full left-0 ">
                 <button
                   className="menu-item"
                   onClick={() => handleDataSourceChange("geoJsonData")}

@@ -82,10 +82,13 @@ function Table({ selectedFeatures, geoJsonKey }: TableProps) {
           return !filterValue || value === filterValue;
         });
       })
+      .slice(0, 75)
       .map((feature: any, index: number) => (
         <tr key={index}>
           {selectedAttributes.map((key: string, idx: number) => (
-            <td key={idx} className="text-light">{feature.properties[key]}</td>
+            <td key={idx} className="text-light">
+              {feature.properties[key]}
+            </td>
           ))}
         </tr>
       ));
