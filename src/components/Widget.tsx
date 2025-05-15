@@ -44,8 +44,8 @@ export const Widget = ({
   ); // State for data source selection
   const [errorShown, setErrorShown] = useState(false); // State to track if the error has been shown
 
-  console.log("renderedMapData", renderedMapData);
-  console.log("renderedMapData[0]", renderedMapData[0]);
+  // console.log("renderedMapData", renderedMapData);
+  // console.log("renderedMapData[0]", renderedMapData[0]);
 
   const data =
     dataSource === "geoJsonData"
@@ -64,7 +64,7 @@ export const Widget = ({
     if (SaveState[0] === "load") {
       const savedWidgets = localStorage.getItem(SaveState[1]);
       if (savedWidgets) {
-        const saveData = JSON.parse(savedWidgets);
+        const saveData = JSON.parse(savedWidgets).widgets;
         for (let i = 0; i < saveData.length; i++) {
           if (saveData[i].id === id) {
             setPosition(saveData[i].position);

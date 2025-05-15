@@ -10,6 +10,7 @@ import WidgetSelectionForm from "./WidgetSelectionForm";
 import ChartForm from "./ChartForm";
 import TableConfigForm from "./TableConfigForm";
 import SaveDashboardForm from "./SaveDashboardForm";
+import BarLoader from "./BarLoader";
 
 import DataSelectionForm from './DataSelectionForm';
 import { supabase } from '../supabaseClient';
@@ -29,7 +30,7 @@ import {
   Geometry,
   GeoJsonProperties,
 } from "geojson";
-import { setGeoJsonData, setSaveState, setSelectedKey } from "../redux/actions";
+import { setGeoJsonData, setMapSyncComplete, setMapSyncStatus, setSaveState, setSelectedKey } from "../redux/actions";
 
 
 export interface DashboardProps {
@@ -42,6 +43,8 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
   const ReduxKey = useSelector((state: any) => state.geoJsonDataKey);
   // Access the saveState from the Redux store
   const SaveState = useSelector((state: any) => state.saveState);
+  // Access the mapSync data from the Redux store
+  const MapSync = useSelector((state: any) => state.mapSync);
 
   console.log("KEY", ReduxKey);
 
@@ -157,11 +160,16 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
     setSelectionModalOpen(true); // Open widget selection modal
   };
 
+  // Add a state to track when we're saving (for the loading screen)
+  const [isSavingWithLoader, setIsSavingWithLoader] = useState(false);
+
   // This will change the saveState redux variable to begin saving the dashboard with the name
   const handleSaveForm = (dashName: string) => {
-    dispatch(setSaveState("save")); // Dispatch the action to set the save state
     setDashboardName(dashName); // Save the dashboard name
     setSaveSelectionModalOpen(false); // Close the save modal
+    setIsSavingWithLoader(true); // Show the loading screen
+    setIsSaving(true); // Start the saving process
+    dispatch(setMapSyncStatus("sync")); // Request map data
   };
 
   const captureDashboardScreenshot = async (dashboardElementId: string) => {
@@ -171,15 +179,20 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
       return null;
     }
 
-    // Find the foreground content to temporarily hide it
-    const foregroundContent = document.querySelector(".relative.z-10") as HTMLElement;
-    let originalDisplay = "block";
-
-    // Store original display style and hide it
-    if (foregroundContent) {
-      originalDisplay = foregroundContent.style.display;
-      foregroundContent.style.display = "none";
+    // Store the current state of the loader
+    const loaderVisible = isSavingWithLoader;
+    
+    // Find and hide the TopBanner
+    const topBanner = document.querySelector(".fixed.top-0.left-0.w-full.z-50.mt-\\[20px\\]") as HTMLElement;
+    let topBannerDisplay = "block";
+    
+    if (topBanner) {
+      topBannerDisplay = topBanner.style.display;
+      topBanner.style.display = "none";
     }
+    
+    // Wait a moment for the UI to update
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     const canvas = await html2canvas(element, {
       scale: 1,
@@ -188,9 +201,14 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
       allowTaint: true
     });
 
-    // Restore the original display style
-    if (foregroundContent) {
-      foregroundContent.style.display = originalDisplay;
+    // Restore the TopBanner
+    if (topBanner) {
+      topBanner.style.display = topBannerDisplay;
+    }
+    
+    // Restore the loader if it was visible before
+    if (loaderVisible) {
+      setIsSavingWithLoader(true);
     }
 
     const blob = await new Promise<Blob | null>((resolve) => {
@@ -201,16 +219,54 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
     return blob;
   };
 
+  // Add a new state to track the saving process
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Split the saving process into two useEffects
+  // First useEffect: Trigger map sync and wait for response
   useEffect(() => {
-    const uploadToSupabase = async () => {
-      const jsonBlob = new Blob([JSON.stringify(widgets)], {
+    if (!isSaving) return;
+    
+    // If map data is synced or loaded, proceed to actual saving
+    if (MapSync[0] === "synced" || MapSync[0] === "loaded") {
+      // Create a combined object with widgets and mapData
+      const dashboardData = {
+        widgets: widgets,
+        mapData: MapSync[1] || {} // Use empty object if MapSync[1] is null
+      };
+      
+      // Save the combined data to localStorage
+      localStorage.setItem(dashboardName, JSON.stringify(dashboardData));
+      
+      // Upload to Supabase
+      uploadToSupabase();
+      
+      setIsSaving(false); // Reset saving state
+      dispatch(setSaveState("")); // Reset the save state
+    }
+  }, [isSaving, MapSync]);
+
+  // Second useEffect: Handle the actual upload
+  const uploadToSupabase = async () => {
+    try {
+      // Get the map data from MapSync
+      const mapData = MapSync[1];
+      
+      // Create a combined object with widgets and mapData
+      const dashboardData = {
+        widgets: widgets,
+        mapData: mapData
+      };
+      
+      // Create a JSON blob with the combined data
+      const dashboardBlob = new Blob([JSON.stringify(dashboardData)], {
         type: "application/json",
       });
 
       // Upload JSON
       const { error: jsonError } = await supabase.storage
         .from("dashboards")
-        .upload(`${dashboardName}.json`, jsonBlob, {
+        .upload(`${dashboardName}.json`, dashboardBlob, {
           contentType: "application/json",
           upsert: true,
         });
@@ -233,54 +289,162 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
 
       if (imageError)
         console.error(`Error uploading ${dashboardName}.png:`, imageError);
-    };
+    } finally {
+      // Hide the loader when done, regardless of success or failure
+      setIsSavingWithLoader(false);
+    }
+  };
 
+  // Modify the SaveState useEffect to handle loading
+  useEffect(() => {
     if (SaveState[0] === "save") {
-      localStorage.setItem(dashboardName, JSON.stringify(widgets));
-      uploadToSupabase();
+      // This is now handled by the isSaving state and its useEffect
       dispatch(setSaveState("")); // Reset the save state
     } else if (SaveState[0] === "load") {
-      const savedWidgets = localStorage.getItem(SaveState[1]);
-      if (savedWidgets) setWidgets(JSON.parse(savedWidgets));
+      const savedData = localStorage.getItem(SaveState[1]);
+      if (savedData) {
+        const parsedData = JSON.parse(savedData);
+        
+        // Check if the data has the new structure with widgets and mapData
+        if (parsedData.widgets && parsedData.mapData) {
+          // Set widgets from the combined data
+          setWidgets(parsedData.widgets);
+          
+          // Set map data in Redux
+          dispatch(setMapSyncComplete("sync", parsedData.mapData));
+        } else {
+          // Handle legacy format (just widgets array)
+          setWidgets(parsedData);
+        }
+      }
     } else return;
   }, [SaveState]);
 
   return (
-    <div id="full-dashboard" className="dashboard">
-      {/* BACKGROUND LAYER */}
-      <div className="fixed inset-0 z-0 h-full w-full bg-[url('/world.svg')] bg-cover bg-center">
-        {/* The SVG file will act as the background */}
-      </div>
-
-      {/* FOREGROUND CONTENT */}
-      <div className="relative z-10">
-        {/* CALL FOR THE TOP BANNER */}
-        <div className="fixed top-0 left-0 w-full z-50 mt-[20px]">
-          <TopBanner
-            onAddWidget={() => {
-              setDataSelectionModalOpen(true);
-            }}
-            onSaveDashboard={() => {
-              // Change saveState to "saving"
-              setSaveSelectionModalOpen(true);
-            }}
-            onBack={onBack}
-            uploadData={() => {
-              // Change saveState to "saving"
-              setUploadDataModalOpen(true);
-            }}
-            loginUser={() => {
-              setIsDropDownOpen(true);
-            }}
-          />
+    <div>
+      {isSavingWithLoader && (
+        <div className="fixed inset-0 z-[9999] bg-black bg-opacity-75 flex items-center justify-center">
+          <BarLoader />
         </div>
-        {/*Origianlly was opening selection widget. Made it open data selection modal
+      )}
+      <div id="full-dashboard" className="dashboard">
+
+        {/* BACKGROUND LAYER */}
+        <div className="fixed inset-0 z-0 h-full w-full bg-[url('/world.svg')] bg-cover bg-center">
+          {/* The SVG file will act as the background */}
+        </div>
+
+        {/* FOREGROUND CONTENT */}
+        <div className="relative z-10">
+          {/* CALL FOR THE TOP BANNER */}
+          <div className="fixed top-0 left-0 w-full z-50 mt-[20px]">
+            <TopBanner
+              onAddWidget={() => {
+                setDataSelectionModalOpen(true);
+              }}
+              onSaveDashboard={() => {
+                // Change saveState to "saving"
+                setSaveSelectionModalOpen(true);
+              }}
+              onBack={onBack}
+              uploadData={() => {
+                // Change saveState to "saving"
+                setUploadDataModalOpen(true);
+              }}
+              loginUser={() => {
+                setIsDropDownOpen(true);
+              }}
+            />
+          </div>
+          {/*Origianlly was opening selection widget. Made it open data selection modal
         
         
         ADD THE RESSET FOR THE KEY USE EFFECT ON THE ON ADD WIDGET
       
         
         */}
+          {/*Modal to select data, still need to create a redux item that keeps track of data. Then go into the widgets call that use effect to access the map */}
+          <Modal
+            isOpen={isDataSelectionModalOpen}
+            onClose={() => setDataSelectionModalOpen(false)}
+            title="Select Data Set"
+          >
+            <DataSelectionForm />
+            <p>Selected Key: {ReduxKey}</p> {/* Display the selected key */}
+            <button onClick={handleDataSelectionComplete}>Confirm</button>{" "}
+            {/* Button to confirm and proceed */}
+          </Modal>
+          {/* Widget Selection Modal */}
+          <Modal
+            isOpen={isSelectionModalOpen}
+            onClose={() => setSelectionModalOpen(false)}
+            title="Select Widget Type"
+          >
+            <WidgetSelectionForm onSelect={handleWidgetSelect} />
+          </Modal>
+          {/* Widget Configuration Modal */}
+          <Modal
+            isOpen={isConfigModalOpen}
+            onClose={() => setConfigModalOpen(false)}
+            title="Configure Widget"
+          >
+            {selectedWidgetType === "bar" && (
+              <ChartForm onSelect={handleWidgetCreate} />
+            )}
+            {selectedWidgetType === "pie" && (
+              <ChartForm onSelect={handleWidgetCreate} />
+            )}
+            {selectedWidgetType === "line" && (
+              <p>Line chart configuration not implemented yet.</p>
+            )}
+            {selectedWidgetType === "table" && (
+              <TableConfigForm onSelect={handleWidgetCreate} />
+            )}
+          </Modal>
+          {/* Dashboard Saving Modal */}
+          <Modal
+            isOpen={isSaveSelectionModalOpen}
+            onClose={() => setSaveSelectionModalOpen(false)}
+            title="Enter Dashboard Name"
+          >
+            <SaveDashboardForm
+              onEnter={handleSaveForm}
+              curDashName={dashboardName}
+            />
+          </Modal>
+          <Modal
+            isOpen={isUploadDataOpen}
+            onClose={() => setUploadDataModalOpen(false)}
+            title="Enter your data sources"
+          >
+            <UploadGeo />
+            <WMSupload />
+          </Modal>
+
+          <Menu
+            isDropDownOpen={isDropDownOpen}
+            setIsDropDownOpen={setIsDropDownOpen}
+          />
+        </div>
+
+        <div
+          id="dashboard-container"
+          ref={dropZoneRef}
+          className="drop-zone mt-[35px]"
+        >
+          {widgets.map((widget) => (
+            <Widget
+              key={widget.id}
+              id={widget.id}
+              onRemove={removeWidget}
+              type={widget.type}
+              config={widget.config}
+              onUpdatePositionSize={updateWidgetPositionSize}
+            //geoJsonData = {setGeoJsonData}
+            />
+          ))}
+        </div>
+
         {/*Modal to select data, still need to create a redux item that keeps track of data. Then go into the widgets call that use effect to access the map */}
         <Modal
           isOpen={isDataSelectionModalOpen}
@@ -292,6 +456,7 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
           <button onClick={handleDataSelectionComplete}>Confirm</button>{" "}
           {/* Button to confirm and proceed */}
         </Modal>
+
         {/* Widget Selection Modal */}
         <Modal
           isOpen={isSelectionModalOpen}
@@ -300,6 +465,7 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
         >
           <WidgetSelectionForm onSelect={handleWidgetSelect} />
         </Modal>
+
         {/* Widget Configuration Modal */}
         <Modal
           isOpen={isConfigModalOpen}
@@ -315,10 +481,16 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
           {selectedWidgetType === "line" && (
             <p>Line chart configuration not implemented yet.</p>
           )}
+
           {selectedWidgetType === "table" && (
-            <TableConfigForm onSelect={handleWidgetCreate} />
+            <TableConfigForm
+              onSelect={(attributes: string) =>
+                handleWidgetCreate(attributes, "count", {}, false)
+              }
+            />
           )}
         </Modal>
+
         {/* Dashboard Saving Modal */}
         <Modal
           isOpen={isSaveSelectionModalOpen}
@@ -330,96 +502,7 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
             curDashName={dashboardName}
           />
         </Modal>
-        <Modal
-          isOpen={isUploadDataOpen}
-          onClose={() => setUploadDataModalOpen(false)}
-          title="Enter your data sources"
-        >
-          <UploadGeo />
-          <WMSupload />
-        </Modal>
-
-        <Menu
-          isDropDownOpen={isDropDownOpen}
-          setIsDropDownOpen={setIsDropDownOpen}
-        />
       </div>
-
-      <div
-        id="dashboard-container"
-        ref={dropZoneRef}
-        className="drop-zone mt-[35px]"
-      >
-        {widgets.map((widget) => (
-          <Widget
-            key={widget.id}
-            id={widget.id}
-            onRemove={removeWidget}
-            type={widget.type}
-            config={widget.config}
-            onUpdatePositionSize={updateWidgetPositionSize}
-          //geoJsonData = {setGeoJsonData}
-          />
-        ))}
-      </div>
-
-      {/*Modal to select data, still need to create a redux item that keeps track of data. Then go into the widgets call that use effect to access the map */}
-      <Modal
-        isOpen={isDataSelectionModalOpen}
-        onClose={() => setDataSelectionModalOpen(false)}
-        title="Select Data Set"
-      >
-        <DataSelectionForm />
-        <p>Selected Key: {ReduxKey}</p> {/* Display the selected key */}
-        <button onClick={handleDataSelectionComplete}>Confirm</button>{" "}
-        {/* Button to confirm and proceed */}
-      </Modal>
-
-      {/* Widget Selection Modal */}
-      <Modal
-        isOpen={isSelectionModalOpen}
-        onClose={() => setSelectionModalOpen(false)}
-        title="Select Widget Type"
-      >
-        <WidgetSelectionForm onSelect={handleWidgetSelect} />
-      </Modal>
-
-      {/* Widget Configuration Modal */}
-      <Modal
-        isOpen={isConfigModalOpen}
-        onClose={() => setConfigModalOpen(false)}
-        title="Configure Widget"
-      >
-        {selectedWidgetType === "bar" && (
-          <ChartForm onSelect={handleWidgetCreate} />
-        )}
-        {selectedWidgetType === "pie" && (
-          <ChartForm onSelect={handleWidgetCreate} />
-        )}
-        {selectedWidgetType === "line" && (
-          <p>Line chart configuration not implemented yet.</p>
-        )}
-
-        {selectedWidgetType === "table" && (
-          <TableConfigForm
-            onSelect={(attributes: string) =>
-              handleWidgetCreate(attributes, "count", {}, false)
-            }
-          />
-        )}
-      </Modal>
-
-      {/* Dashboard Saving Modal */}
-      <Modal
-        isOpen={isSaveSelectionModalOpen}
-        onClose={() => setSaveSelectionModalOpen(false)}
-        title="Enter Dashboard Name"
-      >
-        <SaveDashboardForm
-          onEnter={handleSaveForm}
-          curDashName={dashboardName}
-        />
-      </Modal>
     </div>
   );
 };

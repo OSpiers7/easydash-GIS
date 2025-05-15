@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 
 interface MapFilterProps {
-  fileNames: string[];
   fileProperties: { [key: string]: string[] };
+  fileNames: string[];
   onFileFilterSelect: (filteredFiles: string[]) => void;
-  onPropertiesFilterSelect: (checkedProperties: { [fileName: string]: string[] }) => void;
-  isVisible: boolean; // New prop to track visibility
+  onPropertiesFilterSelect: (checkedProperties: { [key: string]: string[] }) => void;
+  isVisible: boolean;
+  selectedFiles?: string[]; // Add this prop to accept selected files from parent
 }
 
 const MapFilter: React.FC<MapFilterProps> = ({
@@ -14,6 +15,7 @@ const MapFilter: React.FC<MapFilterProps> = ({
   onFileFilterSelect,
   onPropertiesFilterSelect,
   isVisible,
+  selectedFiles,
 }) => {
   const [checkedFiles, setCheckedFiles] = useState<string[]>([]);
   const [checkedProperties, setCheckedProperties] = useState<{ [fileName: string]: string[] }>({});
@@ -53,7 +55,13 @@ const MapFilter: React.FC<MapFilterProps> = ({
     }
   }, [isVisible, fileNames]); // Run whenever isVisible changes
 
-  
+  // Add a useEffect to sync with parent component's filteredFiles
+  useEffect(() => {
+    // If the parent component has already selected files, use those
+    if (selectedFiles && selectedFiles.length > 0) {
+      setCheckedFiles(selectedFiles);
+    }
+  }, [selectedFiles]);
 
   const handleFileCheckboxChange = (fileName: string, ) => {
     setCheckedFiles((prev) => {
