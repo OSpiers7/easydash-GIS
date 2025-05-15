@@ -9,9 +9,9 @@ import GeoJSONChart from "./GeoJSONChart";
 import PieChart from "./PieChart";
 import Map from "./Map"; // Import Map component
 
-import { useDispatch } from 'react-redux';  // Import useDispatch
+import { useDispatch } from "react-redux"; // Import useDispatch
 //USE THIS CODE TO ACCESS THE DATA FROM THE REDUX STORE
-import { useSelector } from 'react-redux';
+import { useSelector } from "react-redux";
 import { selectIsUserLoggedIn } from "../redux/reducers";
 
 export interface WidgetProps {
@@ -19,7 +19,11 @@ export interface WidgetProps {
   onRemove: (id: string) => void;
   type: string; // Add type prop
   config: any; // Add config prop
-  onUpdatePositionSize: (id: string, position: { x: number; y: number }, size: { width: number; height: number }) => void; // Add prop to give size and position to dashboard
+  onUpdatePositionSize: (
+    id: string,
+    position: { x: number; y: number },
+    size: { width: number; height: number }
+  ) => void; // Add prop to give size and position to dashboard
 }
 
 export const Widget = ({
@@ -31,7 +35,9 @@ export const Widget = ({
 }: WidgetProps) => {
   const ReduxKey = useSelector((state: any) => state.geoJsonDataKey);
   const SaveState = useSelector((state: any) => state.saveState);
-  const geoJsonData = useSelector((state: any) => state.geoJsonData.get(config.key));
+  const geoJsonData = useSelector((state: any) =>
+    state.geoJsonData.get(config.key)
+  );
   const mapData = useSelector((state: any) => state.geoJsonData);
   const renderedMapData = useSelector((state: any) => state.renderedMapData); // Access rendered map data
   const isLoggedIn = useSelector(selectIsUserLoggedIn);
@@ -39,18 +45,15 @@ export const Widget = ({
   const bannerRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState({ width: 300, height: 300 });
   const [position, setPosition] = useState({ x: 200, y: 200 }); // Updated initial position
-  const [dataSource, setDataSource] = useState<"geoJsonData" | "renderedMapData">(
-    "geoJsonData"
-  ); // State for data source selection
+  const [dataSource, setDataSource] = useState<
+    "geoJsonData" | "renderedMapData"
+  >("geoJsonData"); // State for data source selection
   const [errorShown, setErrorShown] = useState(false); // State to track if the error has been shown
-
-  console.log("renderedMapData", renderedMapData);
-  console.log("renderedMapData[0]", renderedMapData[0]);
 
   const data =
     dataSource === "geoJsonData"
       ? geoJsonData
-      : renderedMapData[0]
+      : renderedMapData && renderedMapData[0] && renderedMapData[0].geoJsonData // Add error check
       ? renderedMapData[0].geoJsonData
       : (() => {
           if (!errorShown) {
@@ -81,7 +84,9 @@ export const Widget = ({
 
   return (
     <Rnd
-      className={`widget-container ${!isLoggedIn ? "disabled-drag-handle" : ""}`}
+      className={`widget-container ${
+        !isLoggedIn ? "disabled-drag-handle" : ""
+      }`}
       size={{ width: size.width, height: size.height }}
       position={{ x: position.x, y: position.y }}
       minWidth={100}
@@ -160,9 +165,11 @@ export const Widget = ({
             <Table
               selectedFeatures={config.attributes}
               geoJsonKey={config.key}
+              useRenderedData={dataSource === "renderedMapData"} // Pass the new prop
             />
           )}
-          {type === "map" && <Map data={mapData} />} {/* Use selected data source */}
+          {type === "map" && <Map data={mapData} />}{" "}
+          {/* Use selected data source */}
         </div>
       </div>
     </Rnd>

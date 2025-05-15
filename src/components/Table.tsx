@@ -1,29 +1,35 @@
-import React, { useState, useEffect } from 'react';
-
-//USE THIS CODE TO ACCESS THE DATA FROM THE REDUX STORE
-import { useSelector } from 'react-redux';
+import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 
 // Define the props for the Table component
 interface TableProps {
   selectedFeatures: string; // Add selectedFeatures prop
   geoJsonKey: string;
+  useRenderedData: boolean; // New prop to determine which data to use
 }
 
-// Access geoJsonData from Redux state
-//const geoJsonData = useSelector((state: any) => state.geoJsonData);
 // Define the Table component
-function Table({ selectedFeatures, geoJsonKey }: TableProps) {
-
-
-
+function Table({ selectedFeatures, geoJsonKey, useRenderedData }: TableProps) {
   const [filters, setFilters] = useState<any>({});
   const [uniqueValues, setUniqueValues] = useState<any>({});
 
-  const ReduxKey = useSelector((state: any) => state.geoJsonDataKey);
-  const geoJsonData = useSelector((state: any) => state.geoJsonData.get(geoJsonKey));
+  // Conditionally fetch data from Redux store based on the `useRenderedData` prop
+  const geoJsonData = useSelector((state: any) => {
+    if (useRenderedData) {
+      // Check if renderedMapData and its first element are defined
+      if (state.renderedMapData && state.renderedMapData[0]?.geoJsonData) {
+        return state.renderedMapData[0].geoJsonData;
+      } else {
+        console.error("Rendered map data is not available.");
+        return null; // Return null if rendered data is not available
+      }
+    } else {
+      return state.geoJsonData.get(geoJsonKey); // Use the entire dataset
+    }
+  });
 
   // Split the selectedFeatures string into an array of attributes
-  const selectedAttributes = selectedFeatures.split(',');
+  const selectedAttributes = selectedFeatures.split(",");
 
   // Function to extract unique values from each column
   useEffect(() => {
@@ -56,7 +62,7 @@ function Table({ selectedFeatures, geoJsonKey }: TableProps) {
           {key}
           <select
             className="form-control form-control-sm"
-            value={filters[key] || ''}
+            value={filters[key] || ""}
             onChange={(e) => handleFilterChange(key, e.target.value)}
           >
             <option value="">All</option>
@@ -72,10 +78,10 @@ function Table({ selectedFeatures, geoJsonKey }: TableProps) {
     return null;
   };
 
-   // Generate table rows based on filters
-   const generateTableRows = () => {
-    return geoJsonData.features
-      .filter((feature: any) => {
+  // Generate table rows based on filters
+  const generateTableRows = () => {
+    return geoJsonData?.features
+      ?.filter((feature: any) => {
         return selectedAttributes.every((key: string) => {
           const value = feature.properties[key];
           const filterValue = filters[key];
@@ -95,24 +101,22 @@ function Table({ selectedFeatures, geoJsonKey }: TableProps) {
   };
 
   return (
-    <div className="container mt-0" style={{ width: '100%', height: '100%' }}>
-      {geoJsonData && geoJsonData.features?.length > 0 && (
-        <div className="mt-0" style={{ width: '100%', height: '100%' }}>
-          <div 
+    <div className="container mt-0" style={{ width: "100%", height: "100%" }}>
+      {geoJsonData && geoJsonData.features?.length > 0 ? (
+        <div className="mt-0" style={{ width: "100%", height: "100%" }}>
+          <div
             className="table-responsive"
             style={{
-              width: '100%',
-              height: '100%',
-              overflowY: 'auto', // Enable scrolling if table exceeds available space
+              width: "100%",
+              height: "100%",
+              overflowY: "auto", // Enable scrolling if table exceeds available space
             }}
           >
             <table
               className="table table-dark table-bordered table-hover table-sm"
               style={{
-                width: '100%',  // Ensure the table takes up full width
-                height: '100%', // Ensure the table takes up full height
-               // tableLayout: 'fixed', // Ensures consistent column widths
-               //overflowY: 'auto',
+                width: "100%", // Ensure the table takes up full width
+                height: "100%", // Ensure the table takes up full height
               }}
             >
               <thead className="bg-secondary">
@@ -122,6 +126,8 @@ function Table({ selectedFeatures, geoJsonKey }: TableProps) {
             </table>
           </div>
         </div>
+      ) : (
+        <p>No data available to display.</p>
       )}
     </div>
   );

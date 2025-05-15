@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
-import { FeatureCollection, Feature } from 'geojson';
+import { FeatureCollection, Feature } from "geojson";
 import { RxLayers } from "react-icons/rx";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -16,54 +16,70 @@ interface MapProps {
 const Map: React.FC<MapProps> = ({ data }) => {
   const dispatch = useDispatch();
   const [filteredFiles, setFilteredFiles] = useState<string[]>([]);
-  const [fileProperties, setFileProperties] = useState<{ [key: string]: string[] }>({});
-  const [filteredProperties, setFilteredProperties] = useState<{ [key: string]: string[] }>({});
+  const [fileProperties, setFileProperties] = useState<{
+    [key: string]: string[];
+  }>({});
+  const [filteredProperties, setFilteredProperties] = useState<{
+    [key: string]: string[];
+  }>({});
   const [isClicked, setIsClicked] = useState(false);
   const [map, setMap] = useState<L.Map | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  console.log("Map component rendered");
-  console.log("Data passed to Map component:", data);
-
   // Function to extract rendered data
   const extractRenderedData = () => {
     if (!map) {
-      console.warn("Map is not initialized. Skipping rendered data extraction.");
+      console.warn(
+        "Map is not initialized. Skipping rendered data extraction."
+      );
       return;
     }
 
     const bounds = map.getBounds(); // Get the currently viewable area
-    console.log("Current map bounds:", bounds);
 
     const renderedData = Array.from(data)
       .filter(([fileName, _geoJsonData]) => filteredFiles.includes(fileName))
       .map(([fileName, geoJsonData]) => {
         const filteredFeatures = geoJsonData.features.filter((feature) => {
           if (!feature.geometry) {
-            console.warn(`Feature in file "${fileName}" has no geometry. Skipping.`);
+            console.warn(
+              `Feature in file "${fileName}" has no geometry. Skipping.`
+            );
             return false;
           }
 
-          const [lng, lat] = feature.geometry.type === "Point"
-            ? feature.geometry.coordinates
-            : feature.geometry.type === "Polygon" || feature.geometry.type === "MultiPolygon"
-            ? feature.geometry.coordinates[0][0]
-            : [null, null];
+          const [lng, lat] =
+            feature.geometry.type === "Point"
+              ? feature.geometry.coordinates
+              : feature.geometry.type === "Polygon" ||
+                feature.geometry.type === "MultiPolygon"
+              ? feature.geometry.coordinates[0][0]
+              : [null, null];
 
-          const isWithinBounds = lat !== null && lng !== null && bounds.contains([lat, lng] as L.LatLngTuple);
+          const isWithinBounds =
+            lat !== null &&
+            lng !== null &&
+            bounds.contains([lat, lng] as L.LatLngTuple);
           if (!isWithinBounds) {
-            console.log(`Feature with coordinates [${lat}, ${lng}] is outside bounds.`);
+            console.log(
+              `Feature with coordinates [${lat}, ${lng}] is outside bounds.`
+            );
           }
 
-          return feature.geometry.type !== "GeometryCollection" &&
+          return (
+            feature.geometry.type !== "GeometryCollection" &&
             lat !== null &&
             lng !== null &&
             Array.isArray(feature.geometry.coordinates) &&
             feature.geometry.coordinates.length >= 2 &&
-            isWithinBounds;
+            isWithinBounds
+          );
         });
 
-        console.log(`Filtered features for file "${fileName}":`, filteredFeatures);
+        console.log(
+          `Filtered features for file "${fileName}":`,
+          filteredFeatures
+        );
 
         return {
           fileName,
@@ -74,7 +90,7 @@ const Map: React.FC<MapProps> = ({ data }) => {
         };
       });
 
-    console.log("Rendered data to be dispatched:", renderedData);
+    //console.log("Rendered data to be dispatched:", renderedData);
 
     // Dispatch the rendered data to Redux
     dispatch(setRenderedMapData(renderedData));
@@ -101,7 +117,9 @@ const Map: React.FC<MapProps> = ({ data }) => {
   // Used to rerender layers when user resizes the map widget
   useEffect(() => {
     if (!containerRef.current || !map) {
-      console.warn("Container or map is not initialized. Skipping resize observer.");
+      console.warn(
+        "Container or map is not initialized. Skipping resize observer."
+      );
       return;
     }
 
@@ -168,12 +186,16 @@ const Map: React.FC<MapProps> = ({ data }) => {
       color: color,
       fillColor: color,
       opacity: 1,
-      fillOpacity: 0.8
+      fillOpacity: 0.8,
     };
   };
 
   //Binds pop-ups to each feature based on the filtered properties
-  const onEachFeature = (feature: Feature, layer: L.Layer, fileName: string) => {
+  const onEachFeature = (
+    feature: Feature,
+    layer: L.Layer,
+    fileName: string
+  ) => {
     if (feature.properties) {
       let popUpContent = "";
 
@@ -195,7 +217,9 @@ const Map: React.FC<MapProps> = ({ data }) => {
   };
 
   //Callback function for handling property filter in the MapFilter component
-  const handlePropertyFilterSelect = (checkedProperties: { [key: string]: string[] }) => {
+  const handlePropertyFilterSelect = (checkedProperties: {
+    [key: string]: string[];
+  }) => {
     setFilteredProperties(checkedProperties);
   };
 
