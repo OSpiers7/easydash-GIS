@@ -17,9 +17,11 @@ import { supabase } from '../supabaseClient';
 import html2canvas from 'html2canvas';
 
 
-import Squares from "./Squares";
+//import Squares from "./Squares";
 import WMSupload from "./WMSupload";
 import Menu from "./Menu"
+
+import DataRemove from "./DataRemove";
 
 import { useDispatch } from "react-redux"; // Import useDispatch
 import { useSelector } from "react-redux";
@@ -60,6 +62,7 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
   );
 
   const [isUploadDataOpen, setUploadDataModalOpen] = useState(false);
+  const [isRemoveDataModalOpen, setRemoveDataModalOpen] = useState(false);
   const [isUserLoginModalOpen, setUserLoginModalOpen] = useState(false);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -334,98 +337,107 @@ const Dashboard: React.FC<DashboardProps> = ({ name, onBack }) => {
           {/* The SVG file will act as the background */}
         </div>
 
-        {/* FOREGROUND CONTENT */}
-        <div className="relative z-10">
-          {/* CALL FOR THE TOP BANNER */}
-          <div className="fixed top-0 left-0 w-full z-50 mt-[20px]">
-            <TopBanner
-              onAddWidget={() => {
-                setDataSelectionModalOpen(true);
-              }}
-              onSaveDashboard={() => {
-                // Change saveState to "saving"
-                setSaveSelectionModalOpen(true);
-              }}
-              onBack={onBack}
-              uploadData={() => {
-                // Change saveState to "saving"
-                setUploadDataModalOpen(true);
-              }}
-              loginUser={() => {
-                setIsDropDownOpen(true);
-              }}
-            />
-          </div>
-          {/*Origianlly was opening selection widget. Made it open data selection modal
+      {/* FOREGROUND CONTENT */}
+      <div className="relative z-10">
+        {/* CALL FOR THE TOP BANNER */}
+        <div className="fixed top-0 left-0 w-full z-50 mt-[20px]">
+          <TopBanner
+            onAddWidget={() => {
+              setDataSelectionModalOpen(true);
+            }}
+            onSaveDashboard={() => {
+              // Change saveState to "saving"
+              setSaveSelectionModalOpen(true);
+            }}
+            onBack={onBack}
+            uploadData={() => {
+              // Change saveState to "saving"
+              setUploadDataModalOpen(true);
+            }}
+            onRemoveData={() => {
+              setRemoveDataModalOpen(true);
+            }}
+            loginUser={() => {
+              setIsDropDownOpen(true);
+            }}
+          />
+        </div>
+        {/*Origianlly was opening selection widget. Made it open data selection modal
         
         
         ADD THE RESSET FOR THE KEY USE EFFECT ON THE ON ADD WIDGET
       
         
         */}
-          {/*Modal to select data, still need to create a redux item that keeps track of data. Then go into the widgets call that use effect to access the map */}
-          <Modal
-            isOpen={isDataSelectionModalOpen}
-            onClose={() => setDataSelectionModalOpen(false)}
-            title="Select Data Set"
-          >
-            <DataSelectionForm />
-            <p>Selected Key: {ReduxKey}</p> {/* Display the selected key */}
-            <button onClick={handleDataSelectionComplete}>Confirm</button>{" "}
-            {/* Button to confirm and proceed */}
-          </Modal>
-          {/* Widget Selection Modal */}
-          <Modal
-            isOpen={isSelectionModalOpen}
-            onClose={() => setSelectionModalOpen(false)}
-            title="Select Widget Type"
-          >
-            <WidgetSelectionForm onSelect={handleWidgetSelect} />
-          </Modal>
-          {/* Widget Configuration Modal */}
-          <Modal
-            isOpen={isConfigModalOpen}
-            onClose={() => setConfigModalOpen(false)}
-            title="Configure Widget"
-          >
-            {selectedWidgetType === "bar" && (
-              <ChartForm onSelect={handleWidgetCreate} />
-            )}
-            {selectedWidgetType === "pie" && (
-              <ChartForm onSelect={handleWidgetCreate} />
-            )}
-            {selectedWidgetType === "line" && (
-              <p>Line chart configuration not implemented yet.</p>
-            )}
-            {selectedWidgetType === "table" && (
-              <TableConfigForm onSelect={handleWidgetCreate} />
-            )}
-          </Modal>
-          {/* Dashboard Saving Modal */}
-          <Modal
-            isOpen={isSaveSelectionModalOpen}
-            onClose={() => setSaveSelectionModalOpen(false)}
-            title="Enter Dashboard Name"
-          >
-            <SaveDashboardForm
-              onEnter={handleSaveForm}
-              curDashName={dashboardName}
-            />
-          </Modal>
-          <Modal
-            isOpen={isUploadDataOpen}
-            onClose={() => setUploadDataModalOpen(false)}
-            title="Enter your data sources"
-          >
-            <UploadGeo />
-            <WMSupload />
-          </Modal>
-
-          <Menu
-            isDropDownOpen={isDropDownOpen}
-            setIsDropDownOpen={setIsDropDownOpen}
+        {/*Modal to select data, still need to create a redux item that keeps track of data. Then go into the widgets call that use effect to access the map */}
+        <Modal
+          isOpen={isDataSelectionModalOpen}
+          onClose={() => setDataSelectionModalOpen(false)}
+          title="Select Data Set"
+        >
+          <DataSelectionForm />
+          <p>Selected Key: {ReduxKey}</p> {/* Display the selected key */}
+          <button onClick={handleDataSelectionComplete}>Confirm</button>{" "}
+          {/* Button to confirm and proceed */}
+        </Modal>
+        {/* Widget Selection Modal */}
+        <Modal
+          isOpen={isSelectionModalOpen}
+          onClose={() => setSelectionModalOpen(false)}
+          title="Select Widget Type"
+        >
+          <WidgetSelectionForm onSelect={handleWidgetSelect} />
+        </Modal>
+        {/* Widget Configuration Modal */}
+        <Modal
+          isOpen={isConfigModalOpen}
+          onClose={() => setConfigModalOpen(false)}
+          title="Configure Widget"
+        >
+          {selectedWidgetType === "bar" && (
+            <ChartForm onSelect={handleWidgetCreate} />
+          )}
+          {selectedWidgetType === "pie" && (
+            <ChartForm onSelect={handleWidgetCreate} />
+          )}
+          {selectedWidgetType === "line" && (
+            <p>Line chart configuration not implemented yet.</p>
+          )}
+          {selectedWidgetType === "table" && (
+            <TableConfigForm onSelect={handleWidgetCreate} />
+          )}
+        </Modal>
+        {/* Dashboard Saving Modal */}
+        <Modal
+          isOpen={isSaveSelectionModalOpen}
+          onClose={() => setSaveSelectionModalOpen(false)}
+          title="Enter Dashboard Name"
+        >
+          <SaveDashboardForm
+            onEnter={handleSaveForm}
+            curDashName={dashboardName}
           />
-        </div>
+        </Modal>
+        <Modal
+          isOpen={isUploadDataOpen}
+          onClose={() => setUploadDataModalOpen(false)}
+          title="Enter your data sources"
+        >
+          <UploadGeo />
+          <WMSupload />
+        </Modal>
+        <Modal
+          isOpen={isRemoveDataModalOpen}
+          onClose={() => setRemoveDataModalOpen(false)}
+          title="Select Data Set"
+        >
+          <DataRemove />
+        </Modal>
+        <Menu
+          isDropDownOpen={isDropDownOpen}
+          setIsDropDownOpen={setIsDropDownOpen}
+        />
+      </div>
 
         <div
           id="dashboard-container"

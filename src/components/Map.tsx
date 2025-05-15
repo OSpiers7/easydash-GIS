@@ -8,7 +8,7 @@ import MapFilter from "./MapFilter";
 import { Coord } from "../Utils";
 import { useDispatch, useSelector } from "react-redux";
 import { setRenderedMapData, setMapSyncComplete, setMapSyncStatus, setMapSyncData } from "../redux/actions"; // Import the action to set rendered map data
-import { filter } from "lodash";
+import "../styles/Map.css";
 
 interface MapProps {
   data: Map<string, GeoJSON.FeatureCollection>;
@@ -283,7 +283,7 @@ const Map: React.FC<MapProps> = ({ data }) => {
       className="position-relative"
     >
       <button
-        className="btn btn-light rounded shadow position-absolute top-0 end-0 m-4 translate-x-[-8px]"
+        className="btn btn-dark rounded shadow position-absolute top-0 end-0 m-4 translate-x-[-8px]"
         style={{ zIndex: "1000", display: isClicked ? "none" : "block" }}
         onClick={() => data.size > 0 && setIsClicked(!isClicked)}
       >

@@ -9,6 +9,7 @@ import { supabase } from "./supabaseClient";
 import { useDispatch } from 'react-redux';  // Import useDispatch
 import { setGeoJsonData, setSaveState } from './redux/actions';
 import { FeatureCollection, GeoJsonProperties, Geometry } from "geojson";
+import 'leaflet/dist/leaflet.css';
 
 function App() {
   const [count, setCount] = useState(0);

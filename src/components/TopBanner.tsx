@@ -13,6 +13,7 @@ interface TopBannerProps {
   onSaveDashboard: () => void;
   onBack: () => void;
   uploadData: () => void;
+  onRemoveData: () => void;
   loginUser: () => void;
 }
 
@@ -22,6 +23,7 @@ const TopBanner: React.FC<TopBannerProps> = ({
   onSaveDashboard,
   onBack,
   uploadData,
+  onRemoveData,
   loginUser
 }) => {
   const [position, setPosition] = useState({
@@ -56,6 +58,9 @@ const TopBanner: React.FC<TopBannerProps> = ({
           </Tab>
           <Tab setPosition={setPosition} onClick={uploadData}>
             Upload
+          </Tab>
+          <Tab setPosition={setPosition} onClick={onRemoveData}>
+            Remove
           </Tab>
         </>
       )}
