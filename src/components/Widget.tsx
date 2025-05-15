@@ -50,6 +50,9 @@ export const Widget = ({
   >("geoJsonData"); // State for data source selection
   const [errorShown, setErrorShown] = useState(false); // State to track if the error has been shown
 
+  // console.log("renderedMapData", renderedMapData);
+  // console.log("renderedMapData[0]", renderedMapData[0]);
+
   const data =
     dataSource === "geoJsonData"
       ? geoJsonData
@@ -65,17 +68,37 @@ export const Widget = ({
 
   useEffect(() => {
     if (SaveState[0] === "load") {
-      const savedWidgets = localStorage.getItem(SaveState[1]);
-      if (savedWidgets) {
-        const saveData = JSON.parse(savedWidgets);
-        for (let i = 0; i < saveData.length; i++) {
-          if (saveData[i].id === id) {
-            setPosition(saveData[i].position);
-            setSize(saveData[i].size);
+      const saveData = localStorage.getItem(SaveState[1]);
+      if (saveData) {
+        try {
+          const parsedData = JSON.parse(saveData);
+
+          // Check if the data has the new structure with widgets and mapData
+          if (parsedData.widgets) {
+            // New format - widgets are in a nested property
+            const saveWidgets = parsedData.widgets;
+            for (let i = 0; i < saveWidgets.length; i++) {
+              if (saveWidgets[i].id === id) {
+                setPosition(saveWidgets[i].position);
+                setSize(saveWidgets[i].size);
+                break;
+              }
+            }
+          } else if (Array.isArray(parsedData)) {
+            // Legacy format - direct array of widgets
+            for (let i = 0; i < parsedData.length; i++) {
+              if (parsedData[i].id === id) {
+                setPosition(parsedData[i].position);
+                setSize(parsedData[i].size);
+                break;
+              }
+            }
           }
+        } catch (error) {
+          console.error("Error parsing saved widget data:", error);
         }
       }
-    } else return;
+    }
   }, [SaveState]);
 
   useEffect(() => {

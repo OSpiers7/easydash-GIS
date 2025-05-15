@@ -77,6 +77,8 @@ const GeoJSONChart: React.FC<GeoJSONChartProps> = ({
       }
     } else {
       // Default behavior without buckets
+      // console.log("data in barchart", data);
+      // console.log("data features in barchart", data.features);
       data.features.forEach((feature) => {
         const xValue = feature.properties?.[xAttr];
         const yValue = feature.properties?.[yAttr.replace("sum of ", "")];

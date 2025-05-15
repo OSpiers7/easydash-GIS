@@ -19,7 +19,6 @@ function App() {
 
   const syncAllDashboardFilesToLocalStorage = async () => {
     try {
-      // List all files in the "dashboards" bucket
       const { data: files, error: listError } = await supabase.storage
         .from('dashboards')
         .list();
@@ -43,15 +42,15 @@ function App() {
 
         // Convert blob to text and parse JSON
         const text = await data.text();
-        const widgets = JSON.parse(text);
+        const dashboardData = JSON.parse(text);
         
-        // Store in localStorage using filename as key (without .json extension)
+        // Store the entire dashboard data (widgets + mapData) in localStorage
         const keyName = file.name.replace(/\.json$/, '');
-        localStorage.setItem(keyName, JSON.stringify(widgets));
+        localStorage.setItem(keyName, JSON.stringify(dashboardData));
       }
 
       console.log('Dashboard synchronization complete');
-      dispatch(setSaveState("sync")); // Reset the save state
+      dispatch(setSaveState("sync")); // Notify components that sync is complete
     } catch (error) {
       console.error('Error syncing dashboards:', error);
     }

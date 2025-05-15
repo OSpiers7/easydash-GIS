@@ -5,8 +5,14 @@ import { RxLayers } from "react-icons/rx";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import MapFilter from "./MapFilter";
-import { useDispatch } from "react-redux";
-import { setRenderedMapData } from "../redux/actions"; // Import the action to set rendered map data
+import { Coord } from "../Utils";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  setRenderedMapData,
+  setMapSyncComplete,
+  setMapSyncStatus,
+  setMapSyncData,
+} from "../redux/actions"; // Import the action to set rendered map data
 import "../styles/Map.css";
 
 interface MapProps {
@@ -25,6 +31,12 @@ const Map: React.FC<MapProps> = ({ data }) => {
   const [isClicked, setIsClicked] = useState(false);
   const [map, setMap] = useState<L.Map | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const MapSync = useSelector((state: any) => state.mapSync);
+  const SaveState = useSelector((state: any) => state.saveState);
+
+  console.log("Map component rendered");
+  // console.log("Data passed to Map component:", data);
 
   // Function to extract rendered data
   const extractRenderedData = () => {
@@ -61,9 +73,7 @@ const Map: React.FC<MapProps> = ({ data }) => {
             lng !== null &&
             bounds.contains([lat, lng] as L.LatLngTuple);
           if (!isWithinBounds) {
-            console.log(
-              `Feature with coordinates [${lat}, ${lng}] is outside bounds.`
-            );
+            // console.log(`Feature with coordinates [${lat}, ${lng}] is outside bounds.`);
           }
 
           return (
@@ -90,7 +100,7 @@ const Map: React.FC<MapProps> = ({ data }) => {
         };
       });
 
-    //console.log("Rendered data to be dispatched:", renderedData);
+    // console.log("Rendered data to be dispatched:", renderedData);
 
     // Dispatch the rendered data to Redux
     dispatch(setRenderedMapData(renderedData));
@@ -103,12 +113,12 @@ const Map: React.FC<MapProps> = ({ data }) => {
       return;
     }
 
-    console.log("Adding map event listeners for moveend and zoomend.");
+    // console.log("Adding map event listeners for moveend and zoomend.");
     map.on("moveend", extractRenderedData);
     map.on("zoomend", extractRenderedData);
 
     return () => {
-      console.log("Removing map event listeners for moveend and zoomend.");
+      // console.log("Removing map event listeners for moveend and zoomend.");
       map.off("moveend", extractRenderedData);
       map.off("zoomend", extractRenderedData);
     };
@@ -123,16 +133,16 @@ const Map: React.FC<MapProps> = ({ data }) => {
       return;
     }
 
-    console.log("Adding resize observer for map container.");
+    // console.log("Adding resize observer for map container.");
     const observer = new ResizeObserver(() => {
-      console.log("Map container resized. Invalidating map size.");
+      // console.log("Map container resized. Invalidating map size.");
       map.invalidateSize();
     });
 
     observer.observe(containerRef.current);
 
     return () => {
-      console.log("Disconnecting resize observer for map container.");
+      // console.log("Disconnecting resize observer for map container.");
       observer.disconnect();
     };
   }, [map]);
@@ -142,6 +152,82 @@ const Map: React.FC<MapProps> = ({ data }) => {
     console.log("Extracting properties for each file.");
     setFileProperties(getProperties());
   }, [data]);
+
+  // Add a new state to track if we're currently loading data
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadedDatasets, setLoadedDatasets] = useState<string[]>([]);
+  // Add a state to track if we've already loaded data
+  const [hasLoaded, setHasLoaded] = useState(false);
+
+  // Extract important map data for saving
+  useEffect(() => {
+    console.log("MapSync changed:", MapSync);
+    // Don't gather data if map is not initialized
+    if (!map) return;
+
+    if (MapSync[0] === "sync" && !hasLoaded) {
+      const loadedData = MapSync[1];
+      console.log("Loading map data:", loadedData);
+
+      if (loadedData && loadedData.selectedDatasets) {
+        // Store the datasets we want to load and set loading flag
+        setLoadedDatasets(loadedData.selectedDatasets);
+        setIsLoading(true);
+
+        // Set view with coordinates and zoom
+        if (
+          loadedData.currentCoord &&
+          typeof loadedData.currentZoom === "number"
+        ) {
+          map.setView(
+            [loadedData.currentCoord.x, loadedData.currentCoord.y],
+            loadedData.currentZoom
+          );
+        }
+
+        // Mark that we've loaded data
+        setHasLoaded(true);
+      }
+
+      // Mark as loaded after processing
+      dispatch(setMapSyncStatus("loaded"));
+    }
+
+    // Only gather map data if we're in "sync" mode (saving)
+    if (MapSync[0] === "sync" && map) {
+      // Get current map state
+      const center = map.getCenter();
+      const zoom = map.getZoom();
+      const bounds = map.getBounds();
+
+      // Create map data object
+      const mapData = {
+        selectedDatasets: filteredFiles,
+        currentCoord: new Coord(center.lat, center.lng),
+        currentZoom: zoom,
+        bounds: bounds,
+      };
+
+      console.log("Saving map data:", mapData);
+
+      // Dispatch map data to Redux
+      dispatch(setMapSyncComplete("synced", mapData));
+    }
+  }, [MapSync, map, hasLoaded]);
+
+  // Separate effect to handle the actual loading of datasets
+  useEffect(() => {
+    if (isLoading && map && loadedDatasets.length > 0) {
+      console.log("Applying loaded datasets:", loadedDatasets);
+      setFilteredFiles(loadedDatasets);
+      setIsLoading(false);
+
+      // Force extract rendered data after setting filtered files
+      setTimeout(() => {
+        extractRenderedData();
+      }, 100);
+    }
+  }, [isLoading, map, loadedDatasets]);
 
   // Extracts unique properties from all the features in a file
   const getProperties = () => {
@@ -259,6 +345,7 @@ const Map: React.FC<MapProps> = ({ data }) => {
           onFileFilterSelect={handleFileFilterSelect}
           onPropertiesFilterSelect={handlePropertyFilterSelect}
           isVisible={isClicked}
+          selectedFiles={filteredFiles} // Pass the current selection to MapFilter
         />
       </div>
 
@@ -279,19 +366,22 @@ const Map: React.FC<MapProps> = ({ data }) => {
           .filter(([fileName, _geoJsonData]) =>
             filteredFiles.includes(fileName)
           )
-          .map(([fileName, geoJsonData]) => (
-            <GeoJSON
-              key={`${fileName}-${JSON.stringify(
-                filteredProperties[fileName]
-              )}`}
-              data={geoJsonData}
-              pointToLayer={pointToLayer}
-              style={geoStyle}
-              onEachFeature={(feature, layer) =>
-                onEachFeature(feature, layer, fileName)
-              }
-            />
-          ))}
+          .map(([fileName, geoJsonData]) => {
+            console.log(`Rendering GeoJSON for ${fileName}`); // Add debug log
+            return (
+              <GeoJSON
+                key={`${fileName}-${JSON.stringify(
+                  filteredProperties[fileName]
+                )}-${Date.now()}`} // Add timestamp to force re-render
+                data={geoJsonData}
+                pointToLayer={pointToLayer}
+                style={geoStyle}
+                onEachFeature={(feature, layer) =>
+                  onEachFeature(feature, layer, fileName)
+                }
+              />
+            );
+          })}
       </MapContainer>
     </div>
   );
