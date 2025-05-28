@@ -1,3 +1,6 @@
+// Widget selection form component
+// This component allows users to select the type of widget they want to create
+
 import React, { useState } from "react";
 import "../styles/App.css"; // Import the CSS file for styling
 

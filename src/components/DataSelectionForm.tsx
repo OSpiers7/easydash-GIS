@@ -1,3 +1,7 @@
+// Data selection form component 
+// This component allows users to select a GeoJSON data file from the Redux store when creating widgets
+
+
 import { Feature, FeatureCollection } from "geojson";
 import { createSelector } from 'reselect';
 //USE THIS CODE TO ACCESS THE DATA FROM THE REDUX STORE

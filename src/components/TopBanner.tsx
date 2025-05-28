@@ -1,3 +1,5 @@
+// Top banner for dashboard component
+// Allows user to add widgets, save dashboard, upload data, and log in
 
 import React, { useRef, useState } from "react";
 import { motion } from "framer-motion";

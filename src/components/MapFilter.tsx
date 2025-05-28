@@ -1,3 +1,6 @@
+//Map filter component
+// Allows toggling of uploaded geoJSON datasets for map display
+
 import { useState, useEffect, useRef } from "react";
 
 interface MapFilterProps {

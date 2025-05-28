@@ -1,3 +1,6 @@
+// Widget component
+// This component is responsible for rendering different types of widgets (charts, tables, maps) based on the provided type and configuration. 
+
 import React, { useEffect, useRef, useState } from "react";
 import "../styles/App.css";
 import { Coord } from "../Utils";

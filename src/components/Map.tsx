@@ -1,3 +1,6 @@
+// Map component 
+// This component renders a map using Leaflet and displays GeoJSON data on it.
+
 import { useState, useEffect, useRef } from "react";
 import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
 import { FeatureCollection, Feature } from 'geojson';

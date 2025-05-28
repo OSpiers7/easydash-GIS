@@ -1,3 +1,5 @@
+// Top banner / navbar for home page
+
 import React, { useRef, useState } from "react";
 import { motion } from "framer-motion";
 

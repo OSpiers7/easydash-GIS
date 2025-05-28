@@ -1,3 +1,6 @@
+// Widget banner component
+// allows dragging, contains close button, and burger menu for pie bar and table widgets
+
 import React, { forwardRef, useState } from "react";
 import "../styles/WidgetBanner.css"; // Ensure it picks up any necessary styles
 import { useSelector } from "react-redux";

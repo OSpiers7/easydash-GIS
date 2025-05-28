@@ -1,3 +1,7 @@
+// Table component
+// Displays table content; child of widget 
+
+
 import React, { useState, useEffect } from 'react';
 
 //USE THIS CODE TO ACCESS THE DATA FROM THE REDUX STORE

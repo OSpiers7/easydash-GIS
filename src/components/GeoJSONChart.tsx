@@ -1,3 +1,6 @@
+//Bar Chart component to visualize GeoJSON data
+// This component generates a bar chart based on the selected attributes and filters from the GeoJSON data.
+
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import { FeatureCollection } from 'geojson';

@@ -1,3 +1,6 @@
+// Application parent component
+//  
+
 import { useEffect, useState } from "react";
 import "./App.css";
 import "./chartjs-setup";

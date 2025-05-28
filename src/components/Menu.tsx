@@ -1,3 +1,5 @@
+// Modal component for login? 
+
 import React, { useEffect, useRef, useState } from "react";
 import "../styles/TopBanner.css";
 import "../styles/Menu.css"

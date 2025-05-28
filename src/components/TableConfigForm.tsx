@@ -1,3 +1,5 @@
+// Table configuration form; widget creation
+
 import React, { useState } from "react";
 import { Feature } from "geojson";
 import { useSelector } from "react-redux";

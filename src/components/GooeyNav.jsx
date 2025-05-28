@@ -1,3 +1,6 @@
+// unused navbar component
+// 
+
 import { useRef, useEffect, useState } from "react";
 
 const GooeyNav = ({

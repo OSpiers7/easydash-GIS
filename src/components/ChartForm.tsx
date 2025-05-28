@@ -1,3 +1,9 @@
+// Chart configuration form component for BAR & PIE charts
+// This component allows users to select attributes for the X and Y axes, apply filters, and configure the chart settings.
+
+
+
+
 import React, { useState } from "react";
 import { Feature } from "geojson";
 import "../styles/App.css"; // Import the CSS file

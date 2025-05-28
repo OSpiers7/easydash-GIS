@@ -1,3 +1,8 @@
+// Dashboard component. 
+// This component is responsible for rendering the dashboard, managing widgets, and handling user interactions.
+
+
+
 import React, { useEffect, useRef, useState } from "react";
 import TopBanner from "./TopBanner";
 import { Widget, WidgetProps } from "./Widget";

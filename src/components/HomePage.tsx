@@ -1,3 +1,7 @@
+// Home page view component
+// This component serves as the main entry point for the application
+// It includes the top banner, dashboard loading section, and the create new dashboard button 
+
 import HomeTopBanner from "./HomeTopBanner";
 import "../Dashboard.css";
 import Modal from "./Modal";

@@ -1,3 +1,6 @@
+// Pie Chart component
+// This component generates a pie chart based on the selected attributes and filters from the GeoJSON data.
+
 import React from 'react';
 import { Pie } from 'react-chartjs-2';
 import { FeatureCollection } from 'geojson';

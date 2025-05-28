@@ -1,3 +1,6 @@
+// Modal component to display forms
+// Used for upload, widget creation, saving, and login
+
 import React from 'react';
 import '../styles/App.css'; // Ensure you have appropriate CSS for the modal
 

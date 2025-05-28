@@ -1,3 +1,6 @@
+// GeoJson upload form component
+ 
+
 import { FeatureCollection, Geometry, GeoJsonProperties } from 'geojson';
 import { useDispatch, useSelector } from 'react-redux';
 import { setGeoJsonData } from '../redux/actions';
