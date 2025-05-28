@@ -1,6 +1,3 @@
-// Top banner for dashboard component
-// Allows user to add widgets, save dashboard, upload data, and log in
-
 import React, { useRef, useState } from "react";
 import { motion } from "framer-motion";
 
@@ -10,24 +7,12 @@ import { selectIsUserLoggedIn } from "../redux/reducers";
 import UploadGeo from "./GeoJsonUpload";
 import WMSupload from "./WMSupload";
 
-interface TopBannerProps {
-  onAddWidget: () => void;
-  onSaveDashboard: () => void;
-  onBack: () => void;
-  uploadData: () => void;
-  onRemoveData: () => void;
+interface HomeTopBannerProps {
+
   loginUser: () => void;
 }
 
-
-const TopBanner: React.FC<TopBannerProps> = ({
-  onAddWidget,
-  onSaveDashboard,
-  onBack,
-  uploadData,
-  onRemoveData,
-  loginUser
-}) => {
+const HomeTopBanner: React.FC<HomeTopBannerProps> = ({ loginUser}) => {
   const [position, setPosition] = useState({
     left: 0,
     width: 0,
@@ -46,26 +31,10 @@ const TopBanner: React.FC<TopBannerProps> = ({
       }}
       className="relative mx-auto flex w-fit rounded-full border-2 border-black bg-[#F0B5A3] p-1"
     >
-      <Tab setPosition={setPosition} onClick={onBack}>
+      <Tab setPosition={setPosition}>
         Home
       </Tab>
 
-      {isLoggedIn && (
-        <>
-          <Tab setPosition={setPosition} onClick={onAddWidget}>
-            New
-          </Tab>
-          <Tab setPosition={setPosition} onClick={onSaveDashboard}>
-            Save
-          </Tab>
-          <Tab setPosition={setPosition} onClick={uploadData}>
-            Upload
-          </Tab>
-          <Tab setPosition={setPosition} onClick={onRemoveData}>
-            Remove
-          </Tab>
-        </>
-      )}
       {/*CHANGE THE ONCLICK TO OPEN LOG IN MENU*/}
       <Tab setPosition={setPosition} onClick={loginUser}>
         Log In
@@ -74,7 +43,6 @@ const TopBanner: React.FC<TopBannerProps> = ({
       <Cursor position={position} />
     </ul>
   );
-
 };
 interface TabProps {
   children: React.ReactNode;
@@ -85,8 +53,7 @@ interface TabProps {
 }
 
 const Tab: React.FC<TabProps> = ({ children, setPosition, onClick }) => {
-
-    const ref = useRef<HTMLLIElement>(null);
+  const ref = useRef<HTMLLIElement>(null);
 
   return (
     <li
@@ -127,6 +94,4 @@ const Cursor: React.FC<CursorProps> = ({ position }) => {
   );
 };
 
-export default TopBanner;
-
-
+export default HomeTopBanner;

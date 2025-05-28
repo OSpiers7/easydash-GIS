@@ -37,6 +37,8 @@ import {
 } from "react-icons/fi"; // Icons
 import Squares from "./Squares";
 import BarLoader from "./BarLoader";
+import Menu from "./Menu";
+
 
 interface HomePageProps {
   onSelectDashboard: (key: string) => void;
@@ -55,6 +57,8 @@ const HomePage: React.FC<HomePageProps> = ({ onSelectDashboard }) => {
   const isLoggedIn = useSelector(selectIsUserLoggedIn);
 
   const [screenshotUrls, setScreenshotUrls] = useState<ScreenshotMap>({});
+
+  const [isDropDownOpen, setIsDropDownOpen] = useState(false);
 
   // Fetch screenshots from Supabase
   const fetchScreenshots = async () => {
@@ -251,7 +255,16 @@ const HomePage: React.FC<HomePageProps> = ({ onSelectDashboard }) => {
       <div className="relative z-10">
         {/* CALL FOR THE TOP BANNER */}
         <div className="fixed top-0 left-0 w-full z-50 mt-[20px]">
-          <HomeTopBanner />
+          <HomeTopBanner
+            loginUser={() => {
+              setIsDropDownOpen(true);
+            }}
+          />
+
+          <Menu
+            isDropDownOpen={isDropDownOpen}
+            setIsDropDownOpen={setIsDropDownOpen}
+          />
         </div>
 
         <div className="flex justify-center items-start mt-[145px]">
@@ -330,13 +343,16 @@ const HomePage: React.FC<HomePageProps> = ({ onSelectDashboard }) => {
                     className="cursor-pointer"
                   >
                     <TiltedCard
-                      imageSrc={screenshotUrls[key] || "https://i.scdn.co/image/ab67616d0000b273d9985092cd88bffd97653b58"}
+                      imageSrc={
+                        screenshotUrls[key] ||
+                        "https://i.scdn.co/image/ab67616d0000b273d9985092cd88bffd97653b58"
+                      }
                       altText=""
                       captionText=""
                       containerHeight="335px"
-                      containerWidth="410px"
+                      containerWidth="530px"
                       imageHeight="335px"
-                      imageWidth="410px"
+                      imageWidth="530px"
                       rotateAmplitude={12}
                       scaleOnHover={1.2}
                       showMobileWarning={false}
@@ -344,13 +360,13 @@ const HomePage: React.FC<HomePageProps> = ({ onSelectDashboard }) => {
                       displayOverlayContent={true}
                       overlayContent={
                         <div className="flex  w-full items-start justify-between ">
-                          <span className="text-black font-semibold text-[20px] flex-1 break-words mt-2 ">
+                          <span className="text-[#D8CAB8] font-semibold text-[20px] flex-1 break-words mt-2 ">
                             {key}
                           </span>
 
                           {isLoggedIn && (
                             <button
-                              className="bg-transparent text-black p-2 focus:outline-none absolute right-0"
+                              className="bg-transparent text-[#D8CAB8] p-2 focus:outline-none absolute right-0"
                               onClick={(e) => {
                                 e.stopPropagation(); // Prevent parent click
                                 handleDeleteKey(key);

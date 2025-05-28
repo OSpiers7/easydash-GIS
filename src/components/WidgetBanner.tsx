@@ -23,46 +23,52 @@ const WidgetBanner = forwardRef<HTMLDivElement, WidgetBannerProps>(
       setMenuOpen(false); // Close the menu
     };
 
-    return (
-      <div className="widget-banner" ref={ref}>
-        <div className="widget-banner-drag-handle">
-          {/* Dragging happens from here */}
-        </div>
-        {isLoggedIn && (
-          <>
-            <button className="remove-button" onClick={() => onRemove(id)}>
-              ×
+return (
+  <div className="widget-banner" ref={ref}>
+    <div className="widget-banner-drag-handle">
+      {/* Dragging happens from here */}
+    </div>
+
+    {isLoggedIn && (
+      <>
+        <div className="flex justify-between items-center w-full">
+          <button className="remove-button" onClick={() => onRemove(id)}>
+            ×
+          </button>
+
+          {(widgetType === "bar" ||
+            widgetType === "pie" ||
+            widgetType === "table") && (
+            <button
+              className="burger-menu-button bg-transparent shadow-md relative inline-block border-black h-[30px] text-black"
+              onClick={() => setMenuOpen((prev) => !prev)}
+            >
+              <span className="transform -translate-y-[2px]">☰</span>
             </button>
-            {(widgetType === "bar" || widgetType === "pie" || widgetType === "table") && (
-              <>
-                <button
-                  className="burger-menu-button"
-                  onClick={() => setMenuOpen((prev) => !prev)}
-                >
-                  ☰
-                </button>
-                {menuOpen && (
-                  <div className="burger-menu">
-                    <button
-                      className="menu-item"
-                      onClick={() => handleDataSourceChange("geoJsonData")}
-                    >
-                      Use Entire Dataset
-                    </button>
-                    <button
-                      className="menu-item"
-                      onClick={() => handleDataSourceChange("renderedMapData")}
-                    >
-                      Use Rendered Map Data
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-          </>
+          )}
+        </div>
+
+        {menuOpen && (
+          <div className="burger-menu absolute top-full left-0">
+            <button
+              className="menu-item"
+              onClick={() => handleDataSourceChange("geoJsonData")}
+            >
+              Use Entire Dataset
+            </button>
+            <button
+              className="menu-item"
+              onClick={() => handleDataSourceChange("renderedMapData")}
+            >
+              Use Rendered Map Data
+            </button>
+          </div>
         )}
-      </div>
-    );
+      </>
+    )}
+  </div>
+);
+
   }
 );
 

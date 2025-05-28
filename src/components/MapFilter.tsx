@@ -4,11 +4,12 @@
 import { useState, useEffect, useRef } from "react";
 
 interface MapFilterProps {
-  fileNames: string[];
   fileProperties: { [key: string]: string[] };
+  fileNames: string[];
   onFileFilterSelect: (filteredFiles: string[]) => void;
-  onPropertiesFilterSelect: (checkedProperties: { [fileName: string]: string[] }) => void;
-  isVisible: boolean; // New prop to track visibility
+  onPropertiesFilterSelect: (checkedProperties: { [key: string]: string[] }) => void;
+  isVisible: boolean;
+  selectedFiles?: string[]; // Add this prop to accept selected files from parent
 }
 
 const MapFilter: React.FC<MapFilterProps> = ({
@@ -17,10 +18,13 @@ const MapFilter: React.FC<MapFilterProps> = ({
   onFileFilterSelect,
   onPropertiesFilterSelect,
   isVisible,
+  selectedFiles,
 }) => {
   const [checkedFiles, setCheckedFiles] = useState<string[]>([]);
   const [checkedProperties, setCheckedProperties] = useState<{ [fileName: string]: string[] }>({});
   const [collapsedFiles, setCollapsedFiles] = useState<{ [fileName: string]: boolean }>({});
+
+  const contentRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   useEffect(() => {
     onFileFilterSelect(checkedFiles);
@@ -41,7 +45,7 @@ const MapFilter: React.FC<MapFilterProps> = ({
         return resetState;
       });
     }
-  }, [isVisible, fileNames]); // Run whenever isVisible changes
+  }, [isVisible, fileNames]);
 
   // Reset collapse state when visibility changes
   useEffect(() => {
@@ -56,7 +60,13 @@ const MapFilter: React.FC<MapFilterProps> = ({
     }
   }, [isVisible, fileNames]); // Run whenever isVisible changes
 
-  
+  // Add a useEffect to sync with parent component's filteredFiles
+  useEffect(() => {
+    // If the parent component has already selected files, use those
+    if (selectedFiles && selectedFiles.length > 0) {
+      setCheckedFiles(selectedFiles);
+    }
+  }, [selectedFiles]);
 
   const handleFileCheckboxChange = (fileName: string, ) => {
     setCheckedFiles((prev) => {
@@ -89,15 +99,20 @@ const MapFilter: React.FC<MapFilterProps> = ({
     }));
   };
 
+  //Simple styling to fit the rest of the dashboard
+  const filterStyle = {
+    backgroundColor: "#000000",
+    color: "#D8CAB8"
+  }
+
   return (
     <ul className="list-group">
       {fileNames.map((fileName) => {
-        const contentRef = useRef<HTMLDivElement>(null);
         const isOpen = collapsedFiles[fileName];
 
         return (
-          <li key={fileName} className="list-group-item">
-            <div className="d-flex justify-content-between align-items-center">
+          <li key={fileName} className="list-group-item" style={filterStyle}>
+            <div className="d-flex justify-content-between align-items-center" style={filterStyle}>
               <div>
                 <input
                   className="form-check-input me-2"
@@ -123,18 +138,18 @@ const MapFilter: React.FC<MapFilterProps> = ({
             </div>
             {checkedFiles.includes(fileName) && (
               <div
-                ref={contentRef}
+                ref={(el) => (contentRefs.current[fileName] = el)}
                 style={{
                   overflow: "hidden",
                   transition: "max-height 0.3s ease",
                   maxHeight: isOpen
-                    ? contentRef.current?.scrollHeight + "px"
+                    ? contentRefs.current[fileName]?.scrollHeight + "px"
                     : "0px",
                 }}
                 className="mt-2"
               >
                 <ul className="list-group">
-                  {fileProperties[fileName].map((property) => (
+                  {Array.isArray(fileProperties[fileName]) && fileProperties[fileName].map((property) => (
                     <li key={`${fileName}-${property}`}>
                       <input
                         className="form-check-input me-2"

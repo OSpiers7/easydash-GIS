@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux';
-import { SET_GEOJSON_DATA, SET_GEOJSON_SELECTED_KEY, SET_SAVE_NAME, SET_SAVE_STATE, SET_USER_AUTH, CLEAR_USER_AUTH, SET_RENDERED_MAP_DATA } from './actions';
+import { SET_GEOJSON_DATA, SET_GEOJSON_SELECTED_KEY, SET_SAVE_NAME, SET_SAVE_STATE, SET_USER_AUTH, CLEAR_USER_AUTH, SET_RENDERED_MAP_DATA, SET_MAP_SYNC_STATUS, SET_MAP_SYNC_DATA, SET_MAP_SYNC_COMPLETE } from './actions';
 import { FeatureCollection, Geometry, GeoJsonProperties } from 'geojson';
 import { geoJson } from 'leaflet';
 
@@ -12,7 +12,8 @@ const geoJsonReducer = (
 ) => {
   switch (action.type) {
     case SET_GEOJSON_DATA:
-      return new Map([...state, ...action.payload]); // Merge existing state with new data
+      return new Map(action.payload); // Completely replace the Map with the new data
+      //return new Map([...state, ...action.payload]); // Merge existing state with new data
     default:
       return state;
   }
@@ -47,6 +48,25 @@ const saveStateReducer = (
       return [action.payload, state[1]];
     case SET_SAVE_NAME:
       return [state[0], action.payload];
+    default:
+      return state;
+  }
+};
+
+// Initial state for mapSync is a status string and a data object
+const initialMapSync: [string, any] = ["", null];
+
+const mapSyncReducer = (
+  state = initialMapSync,
+  action: { type: string; payload: any }
+) => {
+  switch (action.type) {
+    case SET_MAP_SYNC_STATUS:
+      return [action.payload, state[1]];
+    case SET_MAP_SYNC_DATA:
+      return [state[0], action.payload];
+    case SET_MAP_SYNC_COMPLETE:
+      return [action.payload.status, action.payload.data];
     default:
       return state;
   }
@@ -101,6 +121,7 @@ const rootReducer = combineReducers({
   geoJsonData: geoJsonReducer, 
   geoJsonDataKey: geoJsonKeyReducer,
   saveState: saveStateReducer,
+  mapSync: mapSyncReducer,
   userAuth: userAuthReducer,
   renderedMapData: renderedMapDataReducer,
 });

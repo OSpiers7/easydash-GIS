@@ -12,9 +12,9 @@ import GeoJSONChart from "./GeoJSONChart";
 import PieChart from "./PieChart";
 import Map from "./Map"; // Import Map component
 
-import { useDispatch } from 'react-redux';  // Import useDispatch
+import { useDispatch } from "react-redux"; // Import useDispatch
 //USE THIS CODE TO ACCESS THE DATA FROM THE REDUX STORE
-import { useSelector } from 'react-redux';
+import { useSelector } from "react-redux";
 import { selectIsUserLoggedIn } from "../redux/reducers";
 
 export interface WidgetProps {
@@ -22,7 +22,11 @@ export interface WidgetProps {
   onRemove: (id: string) => void;
   type: string; // Add type prop
   config: any; // Add config prop
-  onUpdatePositionSize: (id: string, position: { x: number; y: number }, size: { width: number; height: number }) => void; // Add prop to give size and position to dashboard
+  onUpdatePositionSize: (
+    id: string,
+    position: { x: number; y: number },
+    size: { width: number; height: number }
+  ) => void; // Add prop to give size and position to dashboard
 }
 
 export const Widget = ({
@@ -34,7 +38,9 @@ export const Widget = ({
 }: WidgetProps) => {
   const ReduxKey = useSelector((state: any) => state.geoJsonDataKey);
   const SaveState = useSelector((state: any) => state.saveState);
-  const geoJsonData = useSelector((state: any) => state.geoJsonData.get(config.key));
+  const geoJsonData = useSelector((state: any) =>
+    state.geoJsonData.get(config.key)
+  );
   const mapData = useSelector((state: any) => state.geoJsonData);
   const renderedMapData = useSelector((state: any) => state.renderedMapData); // Access rendered map data
   const isLoggedIn = useSelector(selectIsUserLoggedIn);
@@ -42,18 +48,18 @@ export const Widget = ({
   const bannerRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState({ width: 300, height: 300 });
   const [position, setPosition] = useState({ x: 200, y: 200 }); // Updated initial position
-  const [dataSource, setDataSource] = useState<"geoJsonData" | "renderedMapData">(
-    "geoJsonData"
-  ); // State for data source selection
+  const [dataSource, setDataSource] = useState<
+    "geoJsonData" | "renderedMapData"
+  >("geoJsonData"); // State for data source selection
   const [errorShown, setErrorShown] = useState(false); // State to track if the error has been shown
 
-  console.log("renderedMapData", renderedMapData);
-  console.log("renderedMapData[0]", renderedMapData[0]);
+  // console.log("renderedMapData", renderedMapData);
+  // console.log("renderedMapData[0]", renderedMapData[0]);
 
   const data =
     dataSource === "geoJsonData"
       ? geoJsonData
-      : renderedMapData[0]
+      : renderedMapData && renderedMapData[0] && renderedMapData[0].geoJsonData // Add error check
       ? renderedMapData[0].geoJsonData
       : (() => {
           if (!errorShown) {
@@ -65,17 +71,37 @@ export const Widget = ({
 
   useEffect(() => {
     if (SaveState[0] === "load") {
-      const savedWidgets = localStorage.getItem(SaveState[1]);
-      if (savedWidgets) {
-        const saveData = JSON.parse(savedWidgets);
-        for (let i = 0; i < saveData.length; i++) {
-          if (saveData[i].id === id) {
-            setPosition(saveData[i].position);
-            setSize(saveData[i].size);
+      const saveData = localStorage.getItem(SaveState[1]);
+      if (saveData) {
+        try {
+          const parsedData = JSON.parse(saveData);
+
+          // Check if the data has the new structure with widgets and mapData
+          if (parsedData.widgets) {
+            // New format - widgets are in a nested property
+            const saveWidgets = parsedData.widgets;
+            for (let i = 0; i < saveWidgets.length; i++) {
+              if (saveWidgets[i].id === id) {
+                setPosition(saveWidgets[i].position);
+                setSize(saveWidgets[i].size);
+                break;
+              }
+            }
+          } else if (Array.isArray(parsedData)) {
+            // Legacy format - direct array of widgets
+            for (let i = 0; i < parsedData.length; i++) {
+              if (parsedData[i].id === id) {
+                setPosition(parsedData[i].position);
+                setSize(parsedData[i].size);
+                break;
+              }
+            }
           }
+        } catch (error) {
+          console.error("Error parsing saved widget data:", error);
         }
       }
-    } else return;
+    }
   }, [SaveState]);
 
   useEffect(() => {
@@ -84,7 +110,9 @@ export const Widget = ({
 
   return (
     <Rnd
-      className={`widget-container ${!isLoggedIn ? "disabled-drag-handle" : ""}`}
+      className={`widget-container ${
+        !isLoggedIn ? "disabled-drag-handle" : ""
+      }`}
       size={{ width: size.width, height: size.height }}
       position={{ x: position.x, y: position.y }}
       minWidth={100}
@@ -163,9 +191,11 @@ export const Widget = ({
             <Table
               selectedFeatures={config.attributes}
               geoJsonKey={config.key}
+              useRenderedData={dataSource === "renderedMapData"} // Pass the new prop
             />
           )}
-          {type === "map" && <Map data={mapData} />} {/* Use selected data source */}
+          {type === "map" && <Map data={mapData} />}{" "}
+          {/* Use selected data source */}
         </div>
       </div>
     </Rnd>
